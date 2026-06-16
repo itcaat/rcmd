@@ -39,6 +39,9 @@ Done:
 - Assignments persist in `~/.config/rcmd/config.yaml`.
 - Holding right Command opens a polished, scrollable OSD assignment overlay.
 - Visual assignment editor exists in Settings.
+- GitHub Actions CI exists for branch pushes and pull requests.
+- Tag-driven GitHub Actions release publishing exists for `v*.*.*` tags.
+- Local `make` targets exist for CI, DMG packaging, and release tag creation.
 
 Not done:
 
@@ -46,7 +49,8 @@ Not done:
 - YAML support is minimal and currently stores key mapping mode and assignments.
 - No tests exist yet; current CommandLineTools install does not expose `XCTest`
   or Swift `Testing`.
-- No build, signing, packaging, or release pipeline exists yet.
+- No signed/notarized app bundle, installer, or polished distribution pipeline
+  exists yet.
 
 ## Product Target
 
@@ -178,12 +182,16 @@ Tasks:
 - Add a minimal Settings window.
 - Add logging.
 - Add basic unit test target.
+- Add CI for branch pushes and pull requests.
+- Add tag-driven release publishing.
 
 Acceptance criteria:
 
 - App builds locally.
 - App launches as a menu bar utility.
 - Settings can be opened from the menu bar.
+- Branch pushes run build/test CI.
+- Version tags publish a GitHub Release artifact.
 
 ### Milestone 1: Permissions and Event Tap
 

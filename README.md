@@ -27,6 +27,17 @@ See [AGENTS.md](AGENTS.md) for instructions for future AI agents.
 swift build
 ```
 
+The repository also provides Make targets used by CI:
+
+```sh
+make ci
+make package VERSION=0.1.0
+```
+
+`make ci` builds the SwiftPM package and runs tests when a `Tests/` directory is
+available. The current project state has no tests, so the test step is skipped
+locally and in CI until tests are added.
+
 ## Run
 
 ```sh
@@ -83,9 +94,36 @@ Keyboard bootstrap logs use the `dev.local.rcmd` subsystem:
 log stream --level debug --style compact --predicate 'subsystem == "dev.local.rcmd"'
 ```
 
+## Release
+
+Every branch push and pull request runs the GitHub Actions CI workflow. Pushing
+a semantic version tag like `v0.1.0` runs the release workflow, builds the app,
+packages `rcmd-app` into a DMG, and publishes a GitHub Release.
+
+Create the next patch tag locally, then push the tag printed by the command:
+
+```sh
+make release
+git push origin vX.Y.Z
+```
+
+Useful variants:
+
+```sh
+make release BUMP=minor
+make release VERSION=0.2.0
+make release-push
+```
+
+`make release-push` creates the next patch tag and pushes it to `origin`,
+triggering the release workflow. The published DMG is not notarized yet; it is a
+minimal unsigned SwiftPM executable distribution.
+
 ## Current Limitations
 
 - YAML support is intentionally minimal and currently stores key mapping mode
   and assignments.
 - No tests yet; the currently selected CommandLineTools install does not expose
   `XCTest` or Swift `Testing`, so `swift test` reports no tests.
+- Release artifacts are unsigned/not notarized DMGs with an executable, not a
+  polished `.app` bundle or installer.

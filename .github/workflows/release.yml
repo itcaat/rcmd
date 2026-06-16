@@ -1,0 +1,49 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - "v*.*.*"
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    name: Build and publish release
+    runs-on: macos-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Show Swift version
+        run: swift --version
+
+      - name: Build and test
+        run: make ci
+
+      - name: Package release DMG
+        run: ./scripts/package-release.sh "${GITHUB_REF_NAME}"
+
+      - name: Publish GitHub release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          tag="${GITHUB_REF_NAME}"
+          artifact="$(find dist -maxdepth 1 -name "rcmd-${tag}-macos.dmg" -print -quit)"
+
+          if [ -z "$artifact" ]; then
+            echo "Release DMG was not produced." >&2
+            exit 1
+          fi
+
+          if gh release view "$tag" >/dev/null 2>&1; then
+            gh release upload "$tag" "$artifact" --clobber
+          else
+            gh release create "$tag" "$artifact" \
+              --verify-tag \
+              --title "$tag" \
+              --generate-notes
+          fi
