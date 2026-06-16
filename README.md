@@ -12,7 +12,8 @@ shell validates:
 - right/left Command key event logging;
 - dynamic assignments for running and installed apps;
 - `right cmd + letter` focusing or launching assigned apps;
-- manual assignments persisted in `~/.config/rcmd/config.yaml`.
+- manual assignments persisted in `~/.config/rcmd/config.yaml`;
+- OSD overlay while right Command is held.
 
 See [PROJECT_PLAN.md](PROJECT_PLAN.md) for the product plan and milestones.
 See [AGENTS.md](AGENTS.md) for instructions for future AI agents.
@@ -34,10 +35,10 @@ the top-right macOS menu bar. If Accessibility permission is missing, the
 Settings window should also open automatically. Click `Request Permission`,
 then grant the app in macOS System Settings.
 
-After permission is granted, open Settings to see dynamic running app
-assignments. Hold right Command and press one of the listed letters to focus a
-running app or launch a closed app. The current key mapping is QWERTY key-code
-based and is not layout-aware yet.
+After permission is granted, hold right Command to show the OSD assignment
+overlay. Press one of the listed letters to focus a running app or launch a
+closed app. The current key mapping is QWERTY key-code based and is not
+layout-aware yet.
 
 To set a manual assignment, focus the target app and press
 `right cmd + right option + letter`. Manual assignments take priority over
@@ -64,7 +65,6 @@ log stream --level debug --style compact --predicate 'subsystem == "dev.local.rc
 ## Current Limitations
 
 - No visual assignment editor yet.
-- No OSD yet.
 - YAML support is intentionally minimal and currently stores only assignments.
 - No tests yet; the currently selected CommandLineTools install does not expose
   `XCTest` or Swift `Testing`, so `swift test` reports no tests.

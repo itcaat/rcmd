@@ -9,6 +9,7 @@ final class RcmdApp: NSObject, NSApplicationDelegate {
     private let eventTapController = EventTapController()
     private var menuBarController: MenuBarController?
     private var settingsWindowController: SettingsWindowController?
+    private var osdWindowController: OSDWindowController?
     private var permissionTimer: Timer?
     private var workspaceObservers: [NSObjectProtocol] = []
 
@@ -24,6 +25,7 @@ final class RcmdApp: NSObject, NSApplicationDelegate {
         AppLog.app.info("rcmd app did finish launching")
 
         settingsWindowController = SettingsWindowController(appState: appState)
+        osdWindowController = OSDWindowController(appState: appState)
         menuBarController = MenuBarController(
             appState: appState,
             actions: MenuBarActions(
@@ -45,6 +47,10 @@ final class RcmdApp: NSObject, NSApplicationDelegate {
 
         eventTapController.onShortcut = { [weak self] shortcut in
             self?.handle(shortcut: shortcut)
+        }
+
+        eventTapController.onRightCommandChanged = { [weak self] isHeld in
+            self?.handleRightCommandChanged(isHeld: isHeld)
         }
 
         appState.refreshAccessibilityStatus()
@@ -96,6 +102,7 @@ final class RcmdApp: NSObject, NSApplicationDelegate {
 
     private func stopEventTap() {
         eventTapController.stop()
+        osdWindowController?.hide()
         appState.eventTapRunning = false
         appState.statusMessage = "Keyboard monitor is stopped."
         menuBarController?.refresh()
@@ -116,6 +123,16 @@ final class RcmdApp: NSObject, NSApplicationDelegate {
 
             refreshAssignments()
             menuBarController?.refresh()
+            osdWindowController?.hide()
+        }
+    }
+
+    private func handleRightCommandChanged(isHeld: Bool) {
+        if isHeld {
+            refreshAssignments()
+            osdWindowController?.show()
+        } else {
+            osdWindowController?.hide()
         }
     }
 

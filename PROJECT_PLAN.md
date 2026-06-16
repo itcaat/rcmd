@@ -35,12 +35,12 @@ Done:
 - `right cmd + letter` can focus or launch assigned apps.
 - Manual assignment capture exists through `right cmd + right option + letter`.
 - Assignments persist in `~/.config/rcmd/config.yaml`.
+- Holding right Command opens a simple OSD assignment overlay.
 
 Not done:
 
 - No Xcode project exists yet.
 - No visual assignment editor exists yet.
-- No OSD exists yet.
 - YAML support is minimal and currently stores assignments only.
 - Key mapping is not keyboard-layout aware yet.
 - No tests exist yet; current CommandLineTools install does not expose `XCTest`
@@ -389,9 +389,9 @@ When continuing this project:
 
 Recommended next action:
 
-1. Add a simple OSD for current assignments.
-2. Replace QWERTY key-code mapping with layout-aware character resolution.
-3. Add a visual assignment editor.
+1. Replace QWERTY key-code mapping with layout-aware character resolution.
+2. Add a visual assignment editor.
+3. Polish OSD positioning/appearance after manual testing.
 4. Broaden config parsing if more YAML settings are introduced.
 
 ## Definition of Done for MVP v0.1

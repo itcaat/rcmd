@@ -21,6 +21,7 @@ enum EventTapError: LocalizedError {
 final class EventTapController {
     var onEvent: (@MainActor (KeyEvent) -> Void)?
     var onShortcut: (@MainActor (KeyShortcut) -> Void)?
+    var onRightCommandChanged: (@MainActor (Bool) -> Void)?
 
     private var eventTap: CFMachPort?
     private var runLoopSource: CFRunLoopSource?
@@ -90,6 +91,7 @@ final class EventTapController {
         rightCommandHeld = false
         rightOptionHeld = false
         consumedKeyCodes.removeAll()
+        emitRightCommandChanged(false)
         AppLog.hotkeys.info("Keyboard event tap stopped")
     }
 
@@ -113,10 +115,15 @@ final class EventTapController {
         emit(keyEvent)
 
         if keyEvent.kind == .flagsChanged, keyEvent.isRightCommandKey {
+            let wasHeld = rightCommandHeld
             rightCommandHeld = keyEvent.commandDown
             if !rightCommandHeld {
                 rightOptionHeld = false
                 consumedKeyCodes.removeAll()
+            }
+
+            if wasHeld != rightCommandHeld {
+                emitRightCommandChanged(rightCommandHeld)
             }
 
             return Unmanaged.passUnretained(event)
@@ -161,6 +168,16 @@ final class EventTapController {
 
         Task { @MainActor in
             onShortcut(shortcut)
+        }
+    }
+
+    private func emitRightCommandChanged(_ isHeld: Bool) {
+        guard let onRightCommandChanged else {
+            return
+        }
+
+        Task { @MainActor in
+            onRightCommandChanged(isHeld)
         }
     }
 }
