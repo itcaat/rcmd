@@ -1,18 +1,26 @@
 import AppKit
 import SwiftUI
 
+struct SettingsActions {
+    let assignApp: @MainActor (_ bundleIdentifier: String, _ letter: Character) -> Void
+    let removeManualAssignment: @MainActor (_ letter: Character) -> Void
+    let setKeyMappingMode: @MainActor (_ mode: KeyMappingMode) -> Void
+}
+
 @MainActor
 final class SettingsWindowController {
     private let appState: AppStateModel
+    private let actions: SettingsActions
     private var window: NSWindow?
 
-    init(appState: AppStateModel) {
+    init(appState: AppStateModel, actions: SettingsActions) {
         self.appState = appState
+        self.actions = actions
     }
 
     func show() {
         if window == nil {
-            let hostingController = NSHostingController(rootView: SettingsView(appState: appState))
+            let hostingController = NSHostingController(rootView: SettingsView(appState: appState, actions: actions))
             let newWindow = NSWindow(contentViewController: hostingController)
             newWindow.title = "rcmd Settings"
             newWindow.styleMask = [.titled, .closable, .miniaturizable]

@@ -27,15 +27,16 @@ Implemented:
 - basic right/left Command key event logging;
 - layout-aware key translation for Latin keyboard layouts;
 - physical QWERTY fallback for non-Latin keyboard layouts;
+- configurable key mapping mode persisted in config;
 - dynamic assignments for running and installed apps;
 - `right cmd + letter` focusing or launching assigned apps;
 - manual assignment capture with `right cmd + right option + letter`;
 - assignment persistence in `~/.config/rcmd/config.yaml`;
-- OSD overlay while right Command is held.
+- OSD overlay while right Command is held;
+- visual assignment editor in Settings.
 
 Not implemented:
 
-- visual assignment editor;
 - Xcode project;
 - no tests;
 - no build or release pipeline.
@@ -46,10 +47,10 @@ Start with MVP v0.1 from `PROJECT_PLAN.md`.
 
 The next practical task is to complete the first MVP app-switching loop:
 
-1. add a visual assignment editor;
-2. polish OSD positioning/appearance after manual testing;
-3. decide whether non-Latin layouts should map by physical key or transliteration;
-4. improve config parsing if broader YAML settings are added.
+1. polish OSD positioning/appearance after manual testing;
+2. improve config parsing if broader YAML settings are added;
+3. start window foundation only after MVP app switching feels stable;
+4. add tests once a usable XCTest/Swift Testing toolchain is available.
 
 Do not start with Spaces, Stages, licensing, or Cmd-Tab replacement. Those are
 later milestones and depend on the app/window foundation.
@@ -63,8 +64,8 @@ later milestones and depend on the app/window foundation.
 - Keep the first implementation small and verifiable.
 - Do not introduce third-party dependencies unless there is a clear need.
 - Do not enable sandboxing until required capabilities are proven.
-- Use readable YAML config at `~/.config/rcmd/config.yaml` for planned
-  persistent settings.
+- Use readable YAML config at `~/.config/rcmd/config.yaml` for persistent
+  key mapping mode and assignments.
 
 ## Workflow Rules
 

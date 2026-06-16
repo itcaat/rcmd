@@ -7,6 +7,8 @@ final class AppStateModel: ObservableObject {
     @Published var statusMessage = "Starting rcmd bootstrap."
     @Published private(set) var recentEvents: [String] = []
     @Published private(set) var assignments: [AppAssignment] = []
+    @Published private(set) var appCatalog: [AppCatalogEntry] = []
+    @Published private(set) var keyMappingMode: KeyMappingMode = .activeLayout
     @Published private(set) var lastShortcutMessage = "No shortcut handled yet."
 
     func refreshAccessibilityStatus() {
@@ -15,6 +17,14 @@ final class AppStateModel: ObservableObject {
 
     func refreshAssignments(_ assignments: [AppAssignment]) {
         self.assignments = assignments
+    }
+
+    func refreshAppCatalog(_ appCatalog: [AppCatalogEntry]) {
+        self.appCatalog = appCatalog
+    }
+
+    func refreshKeyMappingMode(_ mode: KeyMappingMode) {
+        keyMappingMode = mode
     }
 
     func record(event: KeyEvent) {
@@ -42,5 +52,26 @@ final class AppStateModel: ObservableObject {
         statusMessage = lastShortcutMessage
 
         AppLog.hotkeys.info("\(self.lastShortcutMessage, privacy: .public)")
+    }
+
+    func recordManualAssignmentResult(_ result: ManualAssignmentResult) {
+        lastShortcutMessage = result.displayMessage
+        statusMessage = lastShortcutMessage
+
+        AppLog.app.info("\(self.lastShortcutMessage, privacy: .public)")
+    }
+
+    func recordManualAssignmentRemovalResult(_ result: ManualAssignmentRemovalResult) {
+        lastShortcutMessage = result.displayMessage
+        statusMessage = lastShortcutMessage
+
+        AppLog.app.info("\(self.lastShortcutMessage, privacy: .public)")
+    }
+
+    func recordKeyMappingModeChange(_ mode: KeyMappingMode) {
+        lastShortcutMessage = "Key mapping mode set to \(mode.displayName)."
+        statusMessage = lastShortcutMessage
+
+        AppLog.app.info("\(self.lastShortcutMessage, privacy: .public)")
     }
 }

@@ -24,7 +24,20 @@ final class RcmdApp: NSObject, NSApplicationDelegate {
         NSApp.setActivationPolicy(.accessory)
         AppLog.app.info("rcmd app did finish launching")
 
-        settingsWindowController = SettingsWindowController(appState: appState)
+        settingsWindowController = SettingsWindowController(
+            appState: appState,
+            actions: SettingsActions(
+                assignApp: { [weak self] bundleIdentifier, letter in
+                    self?.assign(bundleIdentifier: bundleIdentifier, to: letter)
+                },
+                removeManualAssignment: { [weak self] letter in
+                    self?.removeManualAssignment(for: letter)
+                },
+                setKeyMappingMode: { [weak self] mode in
+                    self?.setKeyMappingMode(mode)
+                }
+            )
+        )
         osdWindowController = OSDWindowController(appState: appState)
         menuBarController = MenuBarController(
             appState: appState,
@@ -54,7 +67,9 @@ final class RcmdApp: NSObject, NSApplicationDelegate {
         }
 
         appState.refreshAccessibilityStatus()
+        refreshKeyMappingMode()
         refreshAssignments()
+        refreshAppCatalog()
         installWorkspaceObservers()
         menuBarController?.refresh()
 
@@ -122,6 +137,7 @@ final class RcmdApp: NSObject, NSApplicationDelegate {
             }
 
             refreshAssignments()
+            refreshAppCatalog()
             menuBarController?.refresh()
             osdWindowController?.hide()
         }
@@ -140,6 +156,38 @@ final class RcmdApp: NSObject, NSApplicationDelegate {
         appState.refreshAssignments(appRegistry.currentAssignments())
     }
 
+    private func refreshAppCatalog() {
+        appState.refreshAppCatalog(appRegistry.appCatalog())
+    }
+
+    private func refreshKeyMappingMode() {
+        eventTapController.keyMappingMode = assignmentStore.keyMappingMode
+        appState.refreshKeyMappingMode(assignmentStore.keyMappingMode)
+    }
+
+    func assign(bundleIdentifier: String, to letter: Character) {
+        let result = appRegistry.assign(bundleIdentifier: bundleIdentifier, to: letter)
+        appState.recordManualAssignmentResult(result)
+        refreshAssignments()
+        refreshAppCatalog()
+        menuBarController?.refresh()
+    }
+
+    func removeManualAssignment(for letter: Character) {
+        let result = appRegistry.removeManualAssignment(for: letter)
+        appState.recordManualAssignmentRemovalResult(result)
+        refreshAssignments()
+        refreshAppCatalog()
+        menuBarController?.refresh()
+    }
+
+    func setKeyMappingMode(_ mode: KeyMappingMode) {
+        assignmentStore.setKeyMappingMode(mode)
+        refreshKeyMappingMode()
+        appState.recordKeyMappingModeChange(mode)
+        menuBarController?.refresh()
+    }
+
     private func installWorkspaceObservers() {
         let notificationCenter = NSWorkspace.shared.notificationCenter
         let notifications: [NSNotification.Name] = [
@@ -156,6 +204,7 @@ final class RcmdApp: NSObject, NSApplicationDelegate {
             ) { [weak self] _ in
                 Task { @MainActor in
                     self?.refreshAssignments()
+                    self?.refreshAppCatalog()
                 }
             }
         }

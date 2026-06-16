@@ -14,7 +14,9 @@ shell validates:
 - `right cmd + letter` focusing or launching assigned apps;
 - manual assignments persisted in `~/.config/rcmd/config.yaml`;
 - OSD overlay while right Command is held;
-- layout-aware key translation for Latin keyboard layouts.
+- layout-aware key translation for Latin keyboard layouts;
+- key mapping mode setting;
+- visual assignment editor in Settings.
 
 See [PROJECT_PLAN.md](PROJECT_PLAN.md) for the product plan and milestones.
 See [AGENTS.md](AGENTS.md) for instructions for future AI agents.
@@ -38,8 +40,14 @@ then grant the app in macOS System Settings.
 
 After permission is granted, hold right Command to show the OSD assignment
 overlay. Press one of the listed letters to focus a running app or launch a
-closed app. Latin keyboard layouts use the active macOS layout; non-Latin
-layouts currently fall back to physical QWERTY letters.
+closed app.
+
+Key mapping mode is configurable in Settings:
+
+- `Physical keys` uses QWERTY letter positions regardless of active keyboard
+  layout.
+- `Active layout` uses the active Latin macOS keyboard layout, with physical
+  QWERTY fallback for non-Latin layouts.
 
 To set a manual assignment, focus the target app and press
 `right cmd + right option + letter`. Manual assignments take priority over
@@ -47,6 +55,17 @@ dynamic assignments and are saved to:
 
 ```text
 ~/.config/rcmd/config.yaml
+```
+
+Manual assignments can also be edited in Settings: choose a letter, choose an
+installed app, click `Assign`, or remove an existing manual assignment.
+
+The config currently stores:
+
+```yaml
+keyMappingMode: activeLayout
+assignments:
+  c: com.google.Chrome
 ```
 
 If the menu bar item is not visible, check whether the process is still running:
@@ -65,8 +84,7 @@ log stream --level debug --style compact --predicate 'subsystem == "dev.local.rc
 
 ## Current Limitations
 
-- No visual assignment editor yet.
-- Non-Latin keyboard layouts currently use physical QWERTY fallback.
-- YAML support is intentionally minimal and currently stores only assignments.
+- YAML support is intentionally minimal and currently stores key mapping mode
+  and assignments.
 - No tests yet; the currently selected CommandLineTools install does not expose
   `XCTest` or Swift `Testing`, so `swift test` reports no tests.

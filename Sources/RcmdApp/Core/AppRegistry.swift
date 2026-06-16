@@ -20,6 +20,22 @@ struct AppAssignment: Identifiable, Sendable, Equatable {
     }
 }
 
+struct AppCatalogEntry: Identifiable, Sendable, Equatable {
+    let appName: String
+    let bundleIdentifier: String
+    let appURL: URL
+    let isRunning: Bool
+
+    var id: String {
+        bundleIdentifier
+    }
+
+    var displayText: String {
+        let state = isRunning ? "running" : "closed"
+        return "\(appName) (\(state))"
+    }
+}
+
 enum AppActivationResult: Sendable, Equatable {
     case focused(AppAssignment)
     case launched(AppAssignment)
@@ -66,6 +82,20 @@ enum ManualAssignmentResult: Sendable, Equatable {
     }
 }
 
+enum ManualAssignmentRemovalResult: Sendable, Equatable {
+    case removed(Character)
+    case notAssigned(Character)
+
+    var displayMessage: String {
+        switch self {
+        case .removed(let letter):
+            "\(String(letter).uppercased()) manual assignment removed."
+        case .notAssigned(let letter):
+            "\(String(letter).uppercased()) has no manual assignment."
+        }
+    }
+}
+
 @MainActor
 final class AppRegistry {
     private let workspace: NSWorkspace
@@ -99,6 +129,17 @@ final class AppRegistry {
 
         return assignments.sorted { lhs, rhs in
             String(lhs.letter) < String(rhs.letter)
+        }
+    }
+
+    func appCatalog() -> [AppCatalogEntry] {
+        installedApplications().map { app in
+            AppCatalogEntry(
+                appName: app.appName,
+                bundleIdentifier: app.bundleIdentifier,
+                appURL: app.appURL,
+                isRunning: isRunning(bundleIdentifier: app.bundleIdentifier)
+            )
         }
     }
 
@@ -158,6 +199,30 @@ final class AppRegistry {
 
         AppLog.app.info("Assigned \(String(normalizedLetter), privacy: .public) to \(assignment.appName, privacy: .public)")
         return .assigned(assignment)
+    }
+
+    func assign(bundleIdentifier: String, to letter: Character) -> ManualAssignmentResult {
+        let normalizedLetter = Character(String(letter).lowercased())
+        assignmentStore.set(bundleIdentifier: bundleIdentifier, for: normalizedLetter)
+
+        guard let assignment = assignment(for: normalizedLetter, bundleIdentifier: bundleIdentifier, isManual: true) else {
+            return .failed(normalizedLetter, "saved app could not be resolved")
+        }
+
+        AppLog.app.info("Assigned \(String(normalizedLetter), privacy: .public) to \(assignment.appName, privacy: .public)")
+        return .assigned(assignment)
+    }
+
+    func removeManualAssignment(for letter: Character) -> ManualAssignmentRemovalResult {
+        let normalizedLetter = Character(String(letter).lowercased())
+
+        guard assignmentStore.bundleIdentifier(for: normalizedLetter) != nil else {
+            return .notAssigned(normalizedLetter)
+        }
+
+        assignmentStore.removeAssignment(for: normalizedLetter)
+        AppLog.app.info("Removed manual assignment for \(String(normalizedLetter), privacy: .public)")
+        return .removed(normalizedLetter)
     }
 
     private func addManualAssignments(

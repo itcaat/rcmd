@@ -1,8 +1,27 @@
 import Foundation
 
+enum KeyMappingMode: String, CaseIterable, Identifiable, Sendable {
+    case activeLayout
+    case physical
+
+    var id: String {
+        rawValue
+    }
+
+    var displayName: String {
+        switch self {
+        case .activeLayout:
+            "Active layout"
+        case .physical:
+            "Physical keys"
+        }
+    }
+}
+
 @MainActor
 final class AssignmentStore {
     private(set) var assignmentsByLetter: [Character: String] = [:]
+    private(set) var keyMappingMode: KeyMappingMode = .activeLayout
 
     private let configURL: URL
 
@@ -25,6 +44,11 @@ final class AssignmentStore {
         save()
     }
 
+    func setKeyMappingMode(_ mode: KeyMappingMode) {
+        keyMappingMode = mode
+        save()
+    }
+
     private func load() {
         guard
             let contents = try? String(contentsOf: configURL, encoding: .utf8),
@@ -35,6 +59,7 @@ final class AssignmentStore {
         }
 
         var parsedAssignments: [Character: String] = [:]
+        var parsedKeyMappingMode = KeyMappingMode.activeLayout
         var inAssignmentsSection = false
 
         for rawLine in contents.components(separatedBy: .newlines) {
@@ -46,6 +71,21 @@ final class AssignmentStore {
 
             if line == "assignments:" {
                 inAssignmentsSection = true
+                continue
+            }
+
+            if !rawLine.hasPrefix(" "), let separatorIndex = line.firstIndex(of: ":") {
+                inAssignmentsSection = false
+
+                let key = line[..<separatorIndex].trimmingCharacters(in: .whitespaces)
+                let valueStart = line.index(after: separatorIndex)
+                let rawValue = line[valueStart...].trimmingCharacters(in: .whitespaces)
+                let value = rawValue.trimmingCharacters(in: CharacterSet(charactersIn: "\"'"))
+
+                if key == "keyMappingMode", let mode = KeyMappingMode(rawValue: value) {
+                    parsedKeyMappingMode = mode
+                }
+
                 continue
             }
 
@@ -70,6 +110,7 @@ final class AssignmentStore {
         }
 
         assignmentsByLetter = parsedAssignments
+        keyMappingMode = parsedKeyMappingMode
     }
 
     private func save() {
@@ -81,6 +122,7 @@ final class AssignmentStore {
 
             var lines = [
                 "# rcmd configuration",
+                "keyMappingMode: \(keyMappingMode.rawValue)",
                 "assignments:"
             ]
 

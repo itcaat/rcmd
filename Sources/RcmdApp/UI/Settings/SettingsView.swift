@@ -1,7 +1,13 @@
 import SwiftUI
 
 struct SettingsView: View {
+    private let editableLetters = Array("abcdefghijklmnopqrstuvwxyz")
+
     @ObservedObject var appState: AppStateModel
+    let actions: SettingsActions
+
+    @State private var selectedLetter: Character = "a"
+    @State private var selectedBundleIdentifier = ""
 
     var body: some View {
         ScrollView {
@@ -45,6 +51,10 @@ struct SettingsView: View {
                     Spacer()
                 }
 
+                keyMappingModeControl
+
+                assignmentEditor
+
                 VStack(alignment: .leading, spacing: 8) {
                     Text("App assignments")
                         .font(.headline)
@@ -82,6 +92,9 @@ struct SettingsView: View {
             .padding(24)
         }
         .frame(width: 560, height: 420)
+        .onAppear {
+            syncDefaultSelectedApp()
+        }
     }
 
     private func statusRow(title: String, value: String) -> some View {
@@ -90,6 +103,108 @@ struct SettingsView: View {
             Spacer()
             Text(value)
                 .fontWeight(.medium)
+        }
+    }
+
+    private var keyMappingModeControl: some View {
+        VStack(alignment: .leading, spacing: 8) {
+            Text("Key mapping")
+                .font(.headline)
+
+            Picker(
+                "Key mapping",
+                selection: Binding(
+                    get: { appState.keyMappingMode },
+                    set: { mode in actions.setKeyMappingMode(mode) }
+                )
+            ) {
+                ForEach(KeyMappingMode.allCases) { mode in
+                    Text(mode.displayName).tag(mode)
+                }
+            }
+            .pickerStyle(.segmented)
+
+            Text(keyMappingDetail)
+                .font(.caption)
+                .foregroundStyle(.secondary)
+                .fixedSize(horizontal: false, vertical: true)
+        }
+    }
+
+    private var assignmentEditor: some View {
+        VStack(alignment: .leading, spacing: 10) {
+            Text("Manual assignment editor")
+                .font(.headline)
+
+            HStack(spacing: 10) {
+                Picker("Letter", selection: $selectedLetter) {
+                    ForEach(editableLetters, id: \.self) { letter in
+                        Text(String(letter).uppercased()).tag(letter)
+                    }
+                }
+                .frame(width: 120)
+
+                Picker("App", selection: $selectedBundleIdentifier) {
+                    ForEach(appState.appCatalog) { app in
+                        Text(app.displayText).tag(app.bundleIdentifier)
+                    }
+                }
+                .frame(minWidth: 240)
+
+                Button("Assign") {
+                    guard !selectedBundleIdentifier.isEmpty else {
+                        return
+                    }
+
+                    actions.assignApp(selectedBundleIdentifier, selectedLetter)
+                }
+                .disabled(selectedBundleIdentifier.isEmpty)
+            }
+
+            manualAssignmentRows
+        }
+        .onChange(of: appState.appCatalog) { _, _ in
+            syncDefaultSelectedApp()
+        }
+    }
+
+    private var manualAssignmentRows: some View {
+        let manualAssignments = appState.assignments.filter(\.isManual)
+
+        return VStack(alignment: .leading, spacing: 6) {
+            if manualAssignments.isEmpty {
+                Text("No manual assignments.")
+                    .foregroundStyle(.secondary)
+            } else {
+                ForEach(manualAssignments) { assignment in
+                    HStack(spacing: 8) {
+                        Text(assignment.displayText)
+                            .font(.system(.caption, design: .monospaced))
+                            .lineLimit(1)
+
+                        Spacer()
+
+                        Button("Remove") {
+                            actions.removeManualAssignment(assignment.letter)
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    private func syncDefaultSelectedApp() {
+        if selectedBundleIdentifier.isEmpty || !appState.appCatalog.contains(where: { $0.bundleIdentifier == selectedBundleIdentifier }) {
+            selectedBundleIdentifier = appState.appCatalog.first?.bundleIdentifier ?? ""
+        }
+    }
+
+    private var keyMappingDetail: String {
+        switch appState.keyMappingMode {
+        case .activeLayout:
+            "Uses the active Latin macOS keyboard layout, with physical QWERTY fallback for non-Latin layouts."
+        case .physical:
+            "Uses physical QWERTY letter positions regardless of active keyboard layout."
         }
     }
 }

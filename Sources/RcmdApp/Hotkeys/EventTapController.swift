@@ -22,6 +22,7 @@ final class EventTapController {
     var onEvent: (@MainActor (KeyEvent) -> Void)?
     var onShortcut: (@MainActor (KeyShortcut) -> Void)?
     var onRightCommandChanged: (@MainActor (Bool) -> Void)?
+    var keyMappingMode: KeyMappingMode = .activeLayout
 
     private var eventTap: CFMachPort?
     private var runLoopSource: CFRunLoopSource?
@@ -141,7 +142,7 @@ final class EventTapController {
         if keyEvent.kind == .keyDown,
            rightCommandHeld,
            event.getIntegerValueField(.keyboardEventAutorepeat) == 0,
-           let letter = KeyboardLayout.letter(for: keyEvent.keyCode) {
+           let letter = KeyboardLayout.letter(for: keyEvent.keyCode, mode: keyMappingMode) {
             consumedKeyCodes.insert(keyEvent.keyCode)
             let shortcutKind: KeyShortcutKind = rightOptionHeld ? .assign : .activate
             emit(KeyShortcut(kind: shortcutKind, letter: letter, keyCode: keyEvent.keyCode, timestamp: Date()))
