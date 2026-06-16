@@ -32,7 +32,11 @@ enum KeyboardLayout {
     ]
 
     static func letter(for keyCode: Int64) -> Character? {
-        translatedLatinLetter(for: keyCode) ?? qwertyFallbackLetters[keyCode]
+        guard keyCode >= 0, keyCode <= Int64(UInt16.max) else {
+            return nil
+        }
+
+        return translatedLatinLetter(for: keyCode) ?? qwertyFallbackLetters[keyCode]
     }
 
     private static func translatedLatinLetter(for keyCode: Int64) -> Character? {
