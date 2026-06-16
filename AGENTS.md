@@ -25,7 +25,8 @@ Implemented:
 - Accessibility permission status/request helper;
 - active `CGEventTap`;
 - basic right/left Command key event logging;
-- QWERTY key-code based letter mapping;
+- layout-aware key translation for Latin keyboard layouts;
+- physical QWERTY fallback for non-Latin keyboard layouts;
 - dynamic assignments for running and installed apps;
 - `right cmd + letter` focusing or launching assigned apps;
 - manual assignment capture with `right cmd + right option + letter`;
@@ -35,7 +36,6 @@ Implemented:
 Not implemented:
 
 - visual assignment editor;
-- keyboard-layout aware key mapping;
 - Xcode project;
 - no tests;
 - no build or release pipeline.
@@ -46,9 +46,9 @@ Start with MVP v0.1 from `PROJECT_PLAN.md`.
 
 The next practical task is to complete the first MVP app-switching loop:
 
-1. replace QWERTY key-code mapping with layout-aware character resolution;
-2. add a visual assignment editor;
-3. polish OSD positioning/appearance after manual testing;
+1. add a visual assignment editor;
+2. polish OSD positioning/appearance after manual testing;
+3. decide whether non-Latin layouts should map by physical key or transliteration;
 4. improve config parsing if broader YAML settings are added.
 
 Do not start with Spaces, Stages, licensing, or Cmd-Tab replacement. Those are

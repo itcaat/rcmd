@@ -30,7 +30,8 @@ Done:
 - Active `CGEventTap` exists for key event logging and handled shortcut
   suppression.
 - Basic right/left Command key identification exists.
-- QWERTY key-code based letter mapping exists.
+- Layout-aware key translation exists for Latin keyboard layouts.
+- Non-Latin keyboard layouts currently use physical QWERTY fallback.
 - Dynamic assignments for running and installed apps exist.
 - `right cmd + letter` can focus or launch assigned apps.
 - Manual assignment capture exists through `right cmd + right option + letter`.
@@ -42,7 +43,6 @@ Not done:
 - No Xcode project exists yet.
 - No visual assignment editor exists yet.
 - YAML support is minimal and currently stores assignments only.
-- Key mapping is not keyboard-layout aware yet.
 - No tests exist yet; current CommandLineTools install does not expose `XCTest`
   or Swift `Testing`.
 - No build, signing, packaging, or release pipeline exists yet.
@@ -389,9 +389,9 @@ When continuing this project:
 
 Recommended next action:
 
-1. Replace QWERTY key-code mapping with layout-aware character resolution.
-2. Add a visual assignment editor.
-3. Polish OSD positioning/appearance after manual testing.
+1. Add a visual assignment editor.
+2. Polish OSD positioning/appearance after manual testing.
+3. Decide whether non-Latin layouts should map by physical key or transliteration.
 4. Broaden config parsing if more YAML settings are introduced.
 
 ## Definition of Done for MVP v0.1

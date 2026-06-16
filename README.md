@@ -13,7 +13,8 @@ shell validates:
 - dynamic assignments for running and installed apps;
 - `right cmd + letter` focusing or launching assigned apps;
 - manual assignments persisted in `~/.config/rcmd/config.yaml`;
-- OSD overlay while right Command is held.
+- OSD overlay while right Command is held;
+- layout-aware key translation for Latin keyboard layouts.
 
 See [PROJECT_PLAN.md](PROJECT_PLAN.md) for the product plan and milestones.
 See [AGENTS.md](AGENTS.md) for instructions for future AI agents.
@@ -37,8 +38,8 @@ then grant the app in macOS System Settings.
 
 After permission is granted, hold right Command to show the OSD assignment
 overlay. Press one of the listed letters to focus a running app or launch a
-closed app. The current key mapping is QWERTY key-code based and is not
-layout-aware yet.
+closed app. Latin keyboard layouts use the active macOS layout; non-Latin
+layouts currently fall back to physical QWERTY letters.
 
 To set a manual assignment, focus the target app and press
 `right cmd + right option + letter`. Manual assignments take priority over
@@ -65,6 +66,7 @@ log stream --level debug --style compact --predicate 'subsystem == "dev.local.rc
 ## Current Limitations
 
 - No visual assignment editor yet.
+- Non-Latin keyboard layouts currently use physical QWERTY fallback.
 - YAML support is intentionally minimal and currently stores only assignments.
 - No tests yet; the currently selected CommandLineTools install does not expose
   `XCTest` or Swift `Testing`, so `swift test` reports no tests.
