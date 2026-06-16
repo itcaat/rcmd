@@ -14,11 +14,28 @@ final class OSDWindowController {
         let panel = panel ?? makePanel()
         self.panel = panel
         position(panel)
+        panel.alphaValue = 0
         panel.orderFrontRegardless()
+        NSAnimationContext.runAnimationGroup { context in
+            context.duration = 0.08
+            panel.animator().alphaValue = 1
+        }
     }
 
     func hide() {
-        panel?.orderOut(nil)
+        guard let panel, panel.isVisible else {
+            return
+        }
+
+        NSAnimationContext.runAnimationGroup { context in
+            context.duration = 0.06
+            panel.animator().alphaValue = 0
+        } completionHandler: {
+            Task { @MainActor in
+                panel.orderOut(nil)
+                panel.alphaValue = 1
+            }
+        }
     }
 
     private func makePanel() -> NSPanel {
@@ -43,16 +60,32 @@ final class OSDWindowController {
     }
 
     private func position(_ panel: NSPanel) {
-        let fittingSize = panel.contentViewController?.view.fittingSize ?? NSSize(width: 560, height: 260)
-        let screenFrame = NSScreen.main?.visibleFrame ?? NSScreen.screens.first?.visibleFrame ?? .zero
-        let width = min(max(fittingSize.width, 360), min(screenFrame.width - 32, 640))
-        let height = min(max(fittingSize.height, 120), min(screenFrame.height - 32, 420))
+        panel.contentViewController?.view.layoutSubtreeIfNeeded()
+
+        let fittingSize = panel.contentViewController?.view.fittingSize ?? NSSize(width: 620, height: 260)
+        let screenFrame = targetScreenFrame()
+        let horizontalPadding: CGFloat = 32
+        let verticalPadding: CGFloat = 28
+        let maxWidth = max(360, screenFrame.width - horizontalPadding * 2)
+        let maxHeight = max(120, min(640, screenFrame.height - verticalPadding * 2))
+        let width = min(max(fittingSize.width, 420), min(maxWidth, 720))
+        let height = min(max(fittingSize.height, 120), maxHeight)
         let originX = screenFrame.midX - width / 2
-        let originY = screenFrame.maxY - height - 28
+        let originY = screenFrame.maxY - height - verticalPadding
 
         panel.setFrame(
             NSRect(x: originX, y: originY, width: width, height: height),
             display: true
         )
+    }
+
+    private func targetScreenFrame() -> NSRect {
+        let mouseLocation = NSEvent.mouseLocation
+
+        if let screen = NSScreen.screens.first(where: { NSMouseInRect(mouseLocation, $0.frame, false) }) {
+            return screen.visibleFrame
+        }
+
+        return NSScreen.main?.visibleFrame ?? NSScreen.screens.first?.visibleFrame ?? NSRect(x: 0, y: 0, width: 720, height: 480)
     }
 }

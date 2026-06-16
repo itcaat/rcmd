@@ -37,7 +37,7 @@ Done:
 - `right cmd + letter` can focus or launch assigned apps.
 - Manual assignment capture exists through `right cmd + right option + letter`.
 - Assignments persist in `~/.config/rcmd/config.yaml`.
-- Holding right Command opens a simple OSD assignment overlay.
+- Holding right Command opens a polished, scrollable OSD assignment overlay.
 - Visual assignment editor exists in Settings.
 
 Not done:
@@ -390,10 +390,10 @@ When continuing this project:
 
 Recommended next action:
 
-1. Polish OSD positioning/appearance after manual testing.
-2. Broaden config parsing if more YAML settings are introduced.
+1. Broaden config parsing if more YAML settings are introduced.
+2. Add tests once a usable XCTest/Swift Testing toolchain is available.
 3. Start window foundation only after MVP app switching feels stable.
-4. Add tests once a usable XCTest/Swift Testing toolchain is available.
+4. Create an Xcode project or app bundle when packaging becomes necessary.
 
 ## Definition of Done for MVP v0.1
 

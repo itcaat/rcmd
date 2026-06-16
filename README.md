@@ -13,7 +13,7 @@ shell validates:
 - dynamic assignments for running and installed apps;
 - `right cmd + letter` focusing or launching assigned apps;
 - manual assignments persisted in `~/.config/rcmd/config.yaml`;
-- OSD overlay while right Command is held;
+- polished OSD overlay while right Command is held;
 - layout-aware key translation for Latin keyboard layouts;
 - key mapping mode setting;
 - visual assignment editor in Settings.
@@ -40,7 +40,8 @@ then grant the app in macOS System Settings.
 
 After permission is granted, hold right Command to show the OSD assignment
 overlay. Press one of the listed letters to focus a running app or launch a
-closed app.
+closed app. The OSD is scrollable for larger assignment lists and appears on
+the screen containing the pointer.
 
 Key mapping mode is configurable in Settings:
 

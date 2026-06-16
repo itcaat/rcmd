@@ -32,7 +32,7 @@ Implemented:
 - `right cmd + letter` focusing or launching assigned apps;
 - manual assignment capture with `right cmd + right option + letter`;
 - assignment persistence in `~/.config/rcmd/config.yaml`;
-- OSD overlay while right Command is held;
+- polished OSD overlay while right Command is held;
 - visual assignment editor in Settings.
 
 Not implemented:
@@ -47,10 +47,10 @@ Start with MVP v0.1 from `PROJECT_PLAN.md`.
 
 The next practical task is to complete the first MVP app-switching loop:
 
-1. polish OSD positioning/appearance after manual testing;
-2. improve config parsing if broader YAML settings are added;
+1. improve config parsing if broader YAML settings are added;
+2. add tests once a usable XCTest/Swift Testing toolchain is available;
 3. start window foundation only after MVP app switching feels stable;
-4. add tests once a usable XCTest/Swift Testing toolchain is available.
+4. create an Xcode project or app bundle when packaging becomes necessary.
 
 Do not start with Spaces, Stages, licensing, or Cmd-Tab replacement. Those are
 later milestones and depend on the app/window foundation.
