@@ -30,14 +30,9 @@ final class AppStateModel: ObservableObject {
         }
     }
 
-    func record(shortcut: KeyShortcut, focused assignment: AppAssignment?) {
-        if let assignment {
-            lastShortcutMessage = "\(shortcut.displayDescription) focused \(assignment.appName)."
-            statusMessage = lastShortcutMessage
-        } else {
-            lastShortcutMessage = "\(shortcut.displayDescription) has no running app assignment."
-            statusMessage = lastShortcutMessage
-        }
+    func record(shortcut: KeyShortcut, result: AppActivationResult) {
+        lastShortcutMessage = "\(shortcut.displayDescription): \(result.displayMessage)"
+        statusMessage = lastShortcutMessage
 
         AppLog.hotkeys.info("\(self.lastShortcutMessage, privacy: .public)")
     }

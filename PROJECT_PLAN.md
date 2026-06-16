@@ -8,8 +8,8 @@ Build a native macOS application inspired by rcmd: fast keyboard-driven app,
 window, and workspace switching using the right-side modifier keys.
 
 This repository is currently at the bootstrap stage. A minimal SwiftPM macOS
-menu bar app shell exists, and the first app-switching behavior can focus
-assigned running apps.
+menu bar app shell exists, and the first app-switching behavior can focus or
+launch assigned apps.
 
 ## Current Repository State
 
@@ -31,13 +31,12 @@ Done:
   suppression.
 - Basic right/left Command key identification exists.
 - QWERTY key-code based letter mapping exists.
-- Dynamic assignments for regular running apps exist.
-- `right cmd + letter` can focus assigned running apps.
+- Dynamic assignments for running and installed apps exist.
+- `right cmd + letter` can focus or launch assigned apps.
 
 Not done:
 
 - No Xcode project exists yet.
-- No app launching behavior exists yet.
 - No manual assignments exist yet.
 - No OSD exists yet.
 - No YAML config exists yet.
@@ -388,8 +387,8 @@ When continuing this project:
 
 Recommended next action:
 
-1. Add app launching for assigned apps that are not running.
-2. Add persistent manual assignments.
+1. Add persistent manual assignments.
+2. Implement `right cmd + right option + letter` assignment capture.
 3. Replace QWERTY key-code mapping with layout-aware character resolution.
 4. Add a simple OSD for current assignments.
 

@@ -94,11 +94,13 @@ final class RcmdApp: NSObject, NSApplicationDelegate {
     }
 
     private func handle(shortcut: KeyShortcut) {
-        refreshAssignments()
-        let assignment = appRegistry.focusAssignedApp(for: shortcut.letter)
-        appState.record(shortcut: shortcut, focused: assignment)
-        refreshAssignments()
-        menuBarController?.refresh()
+        Task { @MainActor in
+            refreshAssignments()
+            let result = await appRegistry.focusOrLaunchAssignedApp(for: shortcut.letter)
+            appState.record(shortcut: shortcut, result: result)
+            refreshAssignments()
+            menuBarController?.refresh()
+        }
     }
 
     private func refreshAssignments() {

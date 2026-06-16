@@ -10,7 +10,7 @@ struct SettingsView: View {
                     .font(.title2)
                     .fontWeight(.semibold)
 
-                Text("This build validates the menu bar shell, Accessibility flow, right Command routing, and focusing assigned running apps.")
+                Text("This build validates the menu bar shell, Accessibility flow, right Command routing, and focusing or launching assigned apps.")
                     .foregroundStyle(.secondary)
                     .fixedSize(horizontal: false, vertical: true)
             }
@@ -45,11 +45,11 @@ struct SettingsView: View {
             }
 
             VStack(alignment: .leading, spacing: 8) {
-                Text("Dynamic running app assignments")
+                Text("Dynamic app assignments")
                     .font(.headline)
 
                 if appState.assignments.isEmpty {
-                    Text("No regular running apps found.")
+                    Text("No regular apps found.")
                         .foregroundStyle(.secondary)
                 } else {
                     LazyVGrid(columns: [GridItem(.adaptive(minimum: 150), spacing: 8)], alignment: .leading, spacing: 8) {

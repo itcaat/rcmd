@@ -26,13 +26,11 @@ Implemented:
 - active `CGEventTap`;
 - basic right/left Command key event logging;
 - QWERTY key-code based letter mapping;
-- dynamic assignments for regular running apps;
-- `right cmd + letter` focusing of assigned running apps.
+- dynamic assignments for running and installed apps;
+- `right cmd + letter` focusing or launching assigned apps.
 
 Not implemented:
 
-- app switching;
-- app launching;
 - custom assignments;
 - OSD;
 - YAML config;
@@ -47,8 +45,8 @@ Start with MVP v0.1 from `PROJECT_PLAN.md`.
 
 The next practical task is to complete the first MVP app-switching loop:
 
-1. add app launching for assigned apps that are not running;
-2. add persistent manual assignments;
+1. add persistent manual assignments;
+2. implement `right cmd + right option + letter` assignment capture;
 3. replace QWERTY key-code mapping with layout-aware character resolution;
 4. add a simple on-screen display for current assignments.
 
