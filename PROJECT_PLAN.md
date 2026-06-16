@@ -7,25 +7,37 @@ Last updated: 2026-06-16
 Build a native macOS application inspired by rcmd: fast keyboard-driven app,
 window, and workspace switching using the right-side modifier keys.
 
-This repository is currently at the planning/bootstrap stage. There is no
-implemented macOS app yet.
+This repository is currently at the bootstrap stage. A minimal SwiftPM macOS
+menu bar app shell exists, but product behavior is not implemented yet.
 
 ## Current Repository State
 
 Done:
 
 - Repository exists at `/Users/nicosha/Documents/my/rcmd`.
-- `README.md` exists with only the project title.
+- `README.md` documents build/run/logging basics.
+- `AGENTS.md` documents workflow rules for future AI agents.
 - Product research was done against:
   - https://lowtechguys.com/rcmd/
   - https://files.lowtechguys.com/rcmd/changelog.html
 - Recommended MVP scope was chosen.
+- SwiftPM package exists in `Package.swift`.
+- App target exists in `Sources/RcmdApp`.
+- App launches as a menu bar utility.
+- Settings window exists.
+- Accessibility permission status and request helper exist.
+- Listen-only `CGEventTap` exists for key event logging.
+- Basic right/left Command key identification exists.
 
 Not done:
 
-- No Xcode project or Swift Package exists yet.
-- No app code exists yet.
-- No tests exist yet.
+- No Xcode project exists yet.
+- No app switching behavior exists yet.
+- No dynamic or manual assignments exist yet.
+- No OSD exists yet.
+- No YAML config exists yet.
+- No tests exist yet; current CommandLineTools install does not expose `XCTest`
+  or Swift `Testing`.
 - No build, signing, packaging, or release pipeline exists yet.
 
 ## Product Target

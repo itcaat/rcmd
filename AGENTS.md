@@ -15,13 +15,25 @@ what should happen next.
 
 ## Current State
 
-The project is still at the planning/bootstrap stage.
+The project is at the bootstrap stage.
 
-There is no implemented macOS app yet:
+Implemented:
 
-- no Xcode project;
-- no Swift package;
-- no app code;
+- SwiftPM package;
+- native macOS menu bar app shell;
+- Settings window;
+- Accessibility permission status/request helper;
+- listen-only `CGEventTap`;
+- basic right/left Command key event logging.
+
+Not implemented:
+
+- app switching;
+- dynamic assignments;
+- custom assignments;
+- OSD;
+- YAML config;
+- Xcode project;
 - no tests;
 - no build or release pipeline.
 
@@ -29,14 +41,14 @@ There is no implemented macOS app yet:
 
 Start with MVP v0.1 from `PROJECT_PLAN.md`.
 
-The next practical task is to bootstrap a native Swift macOS menu bar app and
-prove the core keyboard foundation:
+The next practical task is to turn the keyboard foundation into the first app
+switching behavior:
 
-1. menu bar app shell;
-2. Settings/onboarding window;
-3. Accessibility permission detection;
-4. `CGEventTap` setup;
-5. logging for right Command key events.
+1. track whether right Command is held;
+2. map letter key codes to characters;
+3. build a minimal `AppRegistry` from running apps;
+4. focus one assigned running app with `right cmd + letter`;
+5. add a simple on-screen display after the behavior is proven.
 
 Do not start with Spaces, Stages, licensing, or Cmd-Tab replacement. Those are
 later milestones and depend on the app/window foundation.
@@ -60,12 +72,14 @@ later milestones and depend on the app/window foundation.
 - Use small, focused commits if committing is requested.
 - After code exists, run the smallest relevant build/test command before
   reporting completion.
+- Current verification command is `swift build`. `swift test` reports no tests
+  because the selected CommandLineTools install does not expose a test module.
 - Update `PROJECT_PLAN.md` whenever scope, status, or milestone order changes.
 - Update this file only for agent workflow rules, not detailed product planning.
 
 ## Definition of Done for Bootstrap Work
 
-Bootstrap work is not done until:
+Bootstrap work is currently done when:
 
 - the app builds locally;
 - it launches as a menu bar utility;
