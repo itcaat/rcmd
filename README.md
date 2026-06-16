@@ -16,7 +16,8 @@ shell validates:
 - polished OSD overlay while right Command is held;
 - layout-aware key translation for Latin keyboard layouts;
 - key mapping mode setting;
-- visual assignment editor in Settings.
+- visual assignment editor in Settings;
+- `.app` bundle packaging with Info.plist and app icon.
 
 See [PROJECT_PLAN.md](PROJECT_PLAN.md) for the product plan and milestones.
 See [AGENTS.md](AGENTS.md) for instructions for future AI agents.
@@ -34,9 +35,9 @@ make ci
 make package VERSION=0.1.0
 ```
 
-`make ci` builds the SwiftPM package and runs tests when a `Tests/` directory is
-available. The current project state has no tests, so the test step is skipped
-locally and in CI until tests are added.
+`make ci` builds the SwiftPM package, runs tests when a `Tests/` directory is
+available, and verifies app bundle packaging. The current project state has no
+tests, so the test step is skipped locally and in CI until tests are added.
 
 ## Run
 
@@ -44,10 +45,18 @@ locally and in CI until tests are added.
 swift run rcmd-app
 ```
 
+For app-style manual testing, build a local DMG and open the bundled app:
+
+```sh
+make package
+open dist/rcmd-local-macos/rcmd.app
+```
+
 The app launches as a menu bar utility with a keyboard icon and `rcmd` text in
 the top-right macOS menu bar. If Accessibility permission is missing, the
 Settings window should also open automatically. Click `Request Permission`,
-then grant the app in macOS System Settings.
+then grant the app in macOS System Settings. The keyboard monitor starts
+automatically after permission is granted.
 
 After permission is granted, hold right Command to show the OSD assignment
 overlay. Press one of the listed letters to focus a running app or launch a
@@ -98,7 +107,7 @@ log stream --level debug --style compact --predicate 'subsystem == "dev.local.rc
 
 Every branch push and pull request runs the GitHub Actions CI workflow. Pushing
 a semantic version tag like `v0.1.0` runs the release workflow, builds the app,
-packages `rcmd-app` into a DMG, and publishes a GitHub Release.
+packages `rcmd.app` into a DMG, and publishes a GitHub Release.
 
 Create the next patch tag locally, then push the tag printed by the command:
 
@@ -116,8 +125,8 @@ make release-push
 ```
 
 `make release-push` creates the next patch tag and pushes it to `origin`,
-triggering the release workflow. The published DMG is not notarized yet; it is a
-minimal unsigned SwiftPM executable distribution.
+triggering the release workflow. The published DMG is not notarized yet; the
+app bundle is ad-hoc signed for local integrity only.
 
 ## Current Limitations
 
@@ -125,5 +134,4 @@ minimal unsigned SwiftPM executable distribution.
   and assignments.
 - No tests yet; the currently selected CommandLineTools install does not expose
   `XCTest` or Swift `Testing`, so `swift test` reports no tests.
-- Release artifacts are unsigned/not notarized DMGs with an executable, not a
-  polished `.app` bundle or installer.
+- Release artifacts are not Developer ID signed or notarized yet.

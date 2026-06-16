@@ -42,6 +42,8 @@ Done:
 - GitHub Actions CI exists for branch pushes and pull requests.
 - Tag-driven GitHub Actions release publishing exists for `v*.*.*` tags.
 - Local `make` targets exist for CI, DMG packaging, and release tag creation.
+- DMG packaging now contains `rcmd.app` with `Info.plist`, generated
+  `AppIcon.icns`, `LSUIElement=true`, and ad-hoc signing.
 
 Not done:
 
@@ -49,8 +51,7 @@ Not done:
 - YAML support is minimal and currently stores key mapping mode and assignments.
 - No tests exist yet; current CommandLineTools install does not expose `XCTest`
   or Swift `Testing`.
-- No signed/notarized app bundle, installer, or polished distribution pipeline
-  exists yet.
+- No Developer ID signing, notarization, or installer pipeline exists yet.
 
 ## Product Target
 
@@ -401,7 +402,7 @@ Recommended next action:
 1. Broaden config parsing if more YAML settings are introduced.
 2. Add tests once a usable XCTest/Swift Testing toolchain is available.
 3. Start window foundation only after MVP app switching feels stable.
-4. Create an Xcode project or app bundle when packaging becomes necessary.
+4. Add Developer ID signing/notarization when distribution becomes necessary.
 
 ## Definition of Done for MVP v0.1
 

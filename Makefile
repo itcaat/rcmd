@@ -18,7 +18,7 @@ test:
 		echo "No Swift tests found; skipping swift test."; \
 	fi
 
-ci: build test
+ci: build test package
 
 package:
 	VERSION="$(VERSION)" ./scripts/package-release.sh

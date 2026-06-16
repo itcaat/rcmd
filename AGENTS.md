@@ -33,13 +33,15 @@ Implemented:
 - manual assignment capture with `right cmd + right option + letter`;
 - assignment persistence in `~/.config/rcmd/config.yaml`;
 - polished OSD overlay while right Command is held;
-- visual assignment editor in Settings.
+- visual assignment editor in Settings;
+- `.app` bundle packaging with Info.plist, generated AppIcon.icns, DMG output,
+  and ad-hoc signing.
 
 Not implemented:
 
 - Xcode project;
 - no tests;
-- no build or release pipeline.
+- no Developer ID signing or notarization pipeline.
 
 ## Immediate Priority
 
@@ -50,7 +52,7 @@ The next practical task is to complete the first MVP app-switching loop:
 1. improve config parsing if broader YAML settings are added;
 2. add tests once a usable XCTest/Swift Testing toolchain is available;
 3. start window foundation only after MVP app switching feels stable;
-4. create an Xcode project or app bundle when packaging becomes necessary.
+4. add Developer ID signing/notarization when distribution becomes necessary.
 
 Do not start with Spaces, Stages, licensing, or Cmd-Tab replacement. Those are
 later milestones and depend on the app/window foundation.
@@ -74,8 +76,9 @@ later milestones and depend on the app/window foundation.
 - Use small, focused commits if committing is requested.
 - After code exists, run the smallest relevant build/test command before
   reporting completion.
-- Current verification command is `swift build`. `swift test` reports no tests
-  because the selected CommandLineTools install does not expose a test module.
+- Current verification commands are `swift build` and `make package`.
+  `swift test` reports no tests because the selected CommandLineTools install
+  does not expose a test module.
 - Update `PROJECT_PLAN.md` whenever scope, status, or milestone order changes.
 - Update this file only for agent workflow rules, not detailed product planning.
 

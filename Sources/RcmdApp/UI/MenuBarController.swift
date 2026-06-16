@@ -17,13 +17,13 @@ final class MenuBarController {
     init(appState: AppStateModel, actions: MenuBarActions) {
         self.appState = appState
         self.actions = actions
-        statusItem = NSStatusBar.system.statusItem(withLength: NSStatusItem.variableLength)
+        statusItem = NSStatusBar.system.statusItem(withLength: NSStatusItem.squareLength)
 
         if let button = statusItem.button {
-            button.title = " rcmd"
-            button.image = NSImage(systemSymbolName: "keyboard", accessibilityDescription: "rcmd")
-            button.imagePosition = .imageLeading
-            button.toolTip = "rcmd bootstrap"
+            button.title = ""
+            button.image = MenuBarIcon.make()
+            button.imagePosition = .imageOnly
+            button.toolTip = "rcmd"
         }
 
         refresh()

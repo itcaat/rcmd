@@ -30,26 +30,42 @@ fi
 dist_dir="${repo_root}/dist"
 stage_dir="${dist_dir}/rcmd-${tag}-macos"
 artifact_path="${dist_dir}/rcmd-${tag}-macos.dmg"
+app_path="${stage_dir}/rcmd.app"
+contents_dir="${app_path}/Contents"
+macos_dir="${contents_dir}/MacOS"
+resources_dir="${contents_dir}/Resources"
+iconset_path="${dist_dir}/AppIcon.iconset"
+icon_path="${resources_dir}/AppIcon.icns"
 
-rm -rf "$stage_dir" "$artifact_path"
-mkdir -p "$stage_dir"
+rm -rf "$stage_dir" "$artifact_path" "$iconset_path"
+mkdir -p "$macos_dir" "$resources_dir"
 
-cp "$binary_path" "${stage_dir}/rcmd-app"
+cp "$binary_path" "${macos_dir}/rcmd"
+chmod +x "${macos_dir}/rcmd"
+cp packaging/Info.plist "${contents_dir}/Info.plist"
 cp README.md "${stage_dir}/README.md"
 
+"${repo_root}/scripts/generate-app-icon.swift" "$iconset_path"
+iconutil -c icns "$iconset_path" -o "$icon_path"
+rm -rf "$iconset_path"
+
+if [ "$tag" != "local" ]; then
+  version="${tag#v}"
+  /usr/libexec/PlistBuddy -c "Set :CFBundleShortVersionString ${version}" "${contents_dir}/Info.plist"
+  /usr/libexec/PlistBuddy -c "Set :CFBundleVersion ${version}" "${contents_dir}/Info.plist"
+fi
+
 cat > "${stage_dir}/INSTALL.txt" <<'INSTALL'
-This DMG contains an unsigned SwiftPM-built rcmd-app executable.
+This DMG contains an unsigned rcmd.app build.
 
-Copy rcmd-app to a writable location and run it from Terminal:
-
-  ./rcmd-app
+Copy rcmd.app to /Applications, then launch it normally.
 
 The app requires macOS Accessibility permission before global keyboard
 shortcuts can work.
 INSTALL
 
 if command -v codesign >/dev/null 2>&1; then
-  codesign --force --sign - "${stage_dir}/rcmd-app" >/dev/null 2>&1 || true
+  codesign --force --deep --sign - "$app_path" >/dev/null 2>&1 || true
 fi
 
 hdiutil create \

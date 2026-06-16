@@ -66,7 +66,7 @@ final class RcmdApp: NSObject, NSApplicationDelegate {
             self?.handleRightCommandChanged(isHeld: isHeld)
         }
 
-        appState.refreshAccessibilityStatus()
+        refreshAccessibilityAndStartMonitorIfReady()
         refreshKeyMappingMode()
         refreshAssignments()
         refreshAppCatalog()
@@ -75,14 +75,11 @@ final class RcmdApp: NSObject, NSApplicationDelegate {
 
         permissionTimer = Timer.scheduledTimer(withTimeInterval: 2.0, repeats: true) { [weak self] _ in
             Task { @MainActor in
-                self?.appState.refreshAccessibilityStatus()
-                self?.menuBarController?.refresh()
+                self?.refreshAccessibilityAndStartMonitorIfReady()
             }
         }
 
-        if appState.accessibilityTrusted {
-            startEventTap()
-        } else {
+        if !appState.accessibilityTrusted {
             showSettings()
         }
     }
@@ -100,7 +97,24 @@ final class RcmdApp: NSObject, NSApplicationDelegate {
         NSApp.activate(ignoringOtherApps: true)
     }
 
+    private func refreshAccessibilityAndStartMonitorIfReady() {
+        let wasTrusted = appState.accessibilityTrusted
+        appState.refreshAccessibilityStatus()
+
+        if appState.accessibilityTrusted, !eventTapController.isRunning {
+            startEventTap()
+        } else if !wasTrusted || wasTrusted != appState.accessibilityTrusted {
+            menuBarController?.refresh()
+        }
+    }
+
     private func startEventTap() {
+        if eventTapController.isRunning {
+            appState.eventTapRunning = true
+            menuBarController?.refresh()
+            return
+        }
+
         do {
             try eventTapController.start()
             appState.eventTapRunning = true
