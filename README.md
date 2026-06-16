@@ -49,8 +49,11 @@ For app-style manual testing, build a local DMG and open the bundled app:
 
 ```sh
 make package
-open dist/rcmd-local-macos/rcmd.app
+open dist/rcmd-local-macos.dmg
 ```
+
+The DMG contains `rcmd.app` and an `Applications` shortcut. Drag the app onto
+the shortcut to install it.
 
 The app launches as a menu bar utility with a keyboard icon and `rcmd` text in
 the top-right macOS menu bar. If Accessibility permission is missing, the

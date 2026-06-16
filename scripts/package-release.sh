@@ -44,6 +44,7 @@ cp "$binary_path" "${macos_dir}/rcmd"
 chmod +x "${macos_dir}/rcmd"
 cp packaging/Info.plist "${contents_dir}/Info.plist"
 cp README.md "${stage_dir}/README.md"
+ln -s /Applications "${stage_dir}/Applications"
 
 "${repo_root}/scripts/generate-app-icon.swift" "$iconset_path"
 iconutil -c icns "$iconset_path" -o "$icon_path"
@@ -58,7 +59,8 @@ fi
 cat > "${stage_dir}/INSTALL.txt" <<'INSTALL'
 This DMG contains an unsigned rcmd.app build.
 
-Copy rcmd.app to /Applications, then launch it normally.
+Drag rcmd.app onto the Applications shortcut, then launch it normally from
+/Applications.
 
 The app requires macOS Accessibility permission before global keyboard
 shortcuts can work.
