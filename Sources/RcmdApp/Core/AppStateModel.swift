@@ -11,6 +11,7 @@ final class AppStateModel: ObservableObject {
     @Published private(set) var keyMappingMode: KeyMappingMode = .activeLayout
     @Published private(set) var launchAtLoginEnabled = false
     @Published private(set) var launchAtLoginStatus = "Unknown"
+    @Published private(set) var windows: [WindowInfo] = []
     @Published private(set) var lastShortcutMessage = "No shortcut handled yet."
 
     func refreshAccessibilityStatus() {
@@ -32,6 +33,10 @@ final class AppStateModel: ObservableObject {
     func refreshLaunchAtLogin(_ state: LaunchAtLoginState) {
         launchAtLoginEnabled = state.isEnabled
         launchAtLoginStatus = state.statusText
+    }
+
+    func refreshWindows(_ windows: [WindowInfo]) {
+        self.windows = windows
     }
 
     func record(event: KeyEvent) {

@@ -6,12 +6,15 @@ final class RcmdApp: NSObject, NSApplicationDelegate {
     private let appState = AppStateModel()
     private let assignmentStore: AssignmentStore
     private let appRegistry: AppRegistry
+    private let windowRegistry = WindowRegistry()
     private let launchAtLoginController = LaunchAtLoginController()
     private let eventTapController = EventTapController()
     private var menuBarController: MenuBarController?
     private var settingsWindowController: SettingsWindowController?
     private var osdWindowController: OSDWindowController?
     private var permissionTimer: Timer?
+    private var isWindowRefreshInFlight = false
+    private var needsWindowRefresh = false
     private var workspaceObservers: [NSObjectProtocol] = []
 
     override init() {
@@ -75,12 +78,14 @@ final class RcmdApp: NSObject, NSApplicationDelegate {
         refreshLaunchAtLogin()
         refreshAssignments()
         refreshAppCatalog()
+        refreshWindows()
         installWorkspaceObservers()
         menuBarController?.refresh()
 
         permissionTimer = Timer.scheduledTimer(withTimeInterval: 2.0, repeats: true) { [weak self] _ in
             Task { @MainActor in
                 self?.refreshAccessibilityAndStartMonitorIfReady()
+                self?.refreshWindows()
             }
         }
 
@@ -145,6 +150,7 @@ final class RcmdApp: NSObject, NSApplicationDelegate {
     private func handle(shortcut: KeyShortcut) {
         Task { @MainActor in
             refreshAssignments()
+            refreshWindows()
 
             switch shortcut.kind {
             case .activate:
@@ -157,6 +163,7 @@ final class RcmdApp: NSObject, NSApplicationDelegate {
 
             refreshAssignments()
             refreshAppCatalog()
+            refreshWindows()
             menuBarController?.refresh()
             osdWindowController?.hide()
         }
@@ -165,6 +172,7 @@ final class RcmdApp: NSObject, NSApplicationDelegate {
     private func handleRightCommandChanged(isHeld: Bool) {
         if isHeld {
             refreshAssignments()
+            refreshWindows()
             osdWindowController?.show()
         } else {
             osdWindowController?.hide()
@@ -177,6 +185,25 @@ final class RcmdApp: NSObject, NSApplicationDelegate {
 
     private func refreshAppCatalog() {
         appState.refreshAppCatalog(appRegistry.appCatalog())
+    }
+
+    private func refreshWindows() {
+        guard !isWindowRefreshInFlight else {
+            needsWindowRefresh = true
+            return
+        }
+
+        isWindowRefreshInFlight = true
+
+        Task { @MainActor in
+            repeat {
+                needsWindowRefresh = false
+                let windows = await windowRegistry.currentWindows()
+                appState.refreshWindows(windows)
+            } while needsWindowRefresh
+
+            isWindowRefreshInFlight = false
+        }
     }
 
     private func refreshKeyMappingMode() {
@@ -235,6 +262,7 @@ final class RcmdApp: NSObject, NSApplicationDelegate {
                 Task { @MainActor in
                     self?.refreshAssignments()
                     self?.refreshAppCatalog()
+                    self?.refreshWindows()
                 }
             }
         }

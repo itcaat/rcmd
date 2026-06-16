@@ -61,6 +61,8 @@ struct SettingsView: View {
                     }
                 }
 
+                windowDiagnostics
+
                 VStack(alignment: .leading, spacing: 8) {
                     Text("Recent key events")
                         .font(.headline)
@@ -248,6 +250,54 @@ struct SettingsView: View {
         }
 
         return state
+    }
+
+    private var windowDiagnostics: some View {
+        VStack(alignment: .leading, spacing: 8) {
+            HStack {
+                Text("Windows")
+                    .font(.headline)
+
+                Spacer()
+
+                Text("\(appState.windows.count)")
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+            }
+
+            if !appState.accessibilityTrusted {
+                Text("Grant Accessibility to read window metadata.")
+                    .foregroundStyle(.secondary)
+            } else if appState.windows.isEmpty {
+                Text("No readable windows found.")
+                    .foregroundStyle(.secondary)
+            } else {
+                VStack(alignment: .leading, spacing: 6) {
+                    ForEach(appState.windows.prefix(20)) { window in
+                        windowRow(window)
+                    }
+                }
+            }
+        }
+    }
+
+    private func windowRow(_ window: WindowInfo) -> some View {
+        HStack(spacing: 8) {
+            AppIconView(appURL: window.appURL, size: 20)
+
+            VStack(alignment: .leading, spacing: 1) {
+                Text("\(window.appName): \(window.displayTitle)")
+                    .font(.caption)
+                    .lineLimit(1)
+
+                Text(window.detailText)
+                    .font(.caption2)
+                    .foregroundStyle(.secondary)
+                    .lineLimit(1)
+            }
+            .frame(minWidth: 0, maxWidth: .infinity, alignment: .leading)
+        }
+        .frame(height: 30)
     }
 
     private func syncDefaultSelectedApp() {

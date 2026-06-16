@@ -18,6 +18,7 @@ shell validates:
 - key mapping mode setting;
 - visual assignment editor with app icons in Settings;
 - Launch at Login setting;
+- read-only window diagnostics through Accessibility;
 - `.app` bundle packaging with Info.plist and app icon.
 
 See [PROJECT_PLAN.md](PROJECT_PLAN.md) for the product plan and milestones.
@@ -89,6 +90,11 @@ dynamic assignments and are saved to:
 Manual assignments can also be edited in Settings: choose a letter, choose an
 installed app, click `Assign`, or remove an existing manual assignment.
 
+Settings also includes a `Windows` diagnostics section. It reads current
+window metadata through Accessibility and shows app, title, minimized/focused
+state, and bounds. This is the foundation for future Cmd-Tab/window switching;
+it does not focus individual windows yet.
+
 The config currently stores:
 
 ```yaml
@@ -142,4 +148,6 @@ app bundle is ad-hoc signed for local integrity only.
   and assignments.
 - No tests yet; the currently selected CommandLineTools install does not expose
   `XCTest` or Swift `Testing`, so `swift test` reports no tests.
+- Window support is read-only diagnostics for now; window cycling/focusing is
+  not implemented yet.
 - Release artifacts are not Developer ID signed or notarized yet.

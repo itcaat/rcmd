@@ -35,12 +35,14 @@ Implemented:
 - polished OSD overlay with app icons while right Command is held;
 - visual assignment editor with app icons in Settings;
 - Launch at Login setting through `SMAppService`;
+- read-only window diagnostics through Accessibility API;
 - `.app` bundle packaging with Info.plist, generated AppIcon.icns, DMG output,
   and ad-hoc signing.
 
 Not implemented:
 
 - Xcode project;
+- window cycling/focusing;
 - no tests;
 - no Developer ID signing or notarization pipeline.
 
@@ -52,7 +54,8 @@ The next practical task is to complete the first MVP app-switching loop:
 
 1. improve config parsing if broader YAML settings are added;
 2. add tests once a usable XCTest/Swift Testing toolchain is available;
-3. start window foundation only after MVP app switching feels stable;
+3. continue window foundation by adding AX observers or a lightweight refresh
+   strategy for window title/focus/order updates;
 4. add Developer ID signing/notarization when distribution becomes necessary.
 
 Do not start with Spaces, Stages, licensing, or Cmd-Tab replacement. Those are

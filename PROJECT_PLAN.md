@@ -41,6 +41,8 @@ Done:
   with app icons.
 - Visual assignment editor with app icons exists in Settings.
 - Launch at Login setting exists through `SMAppService`.
+- Read-only window diagnostics exist through Accessibility API and are shown in
+  Settings.
 - GitHub Actions CI exists for branch pushes and pull requests.
 - Tag-driven GitHub Actions release publishing exists for `v*.*.*` tags.
 - Local `make` targets exist for CI, DMG packaging, and release tag creation.
@@ -53,6 +55,8 @@ Not done:
 - YAML support is minimal and currently stores key mapping mode and assignments.
 - No tests exist yet; current CommandLineTools install does not expose `XCTest`
   or Swift `Testing`.
+- Window cycling/focusing is not implemented yet; current window support is a
+  read-only foundation.
 - No Developer ID signing, notarization, or installer pipeline exists yet.
 
 ## Product Target
@@ -258,11 +262,12 @@ Goal: build the data model needed for Cmd-Tab and future window features.
 
 Tasks:
 
-- Read windows via Accessibility API.
+- Read windows via Accessibility API. Done for current regular apps.
 - Track window title, owning app, minimized state, bounds, screen, and focus
-  time.
+  state. Basic title/app/minimized/bounds/focused metadata exists.
 - Add AX observers where practical.
-- Keep blocking Accessibility calls off the main thread.
+- Keep blocking Accessibility calls off the main thread. Done for snapshot
+  reads; refreshes are coalesced to avoid overlapping AX scans.
 
 Acceptance criteria:
 
@@ -401,9 +406,10 @@ When continuing this project:
 
 Recommended next action:
 
-1. Broaden config parsing if more YAML settings are introduced.
-2. Add tests once a usable XCTest/Swift Testing toolchain is available.
-3. Start window foundation only after MVP app switching feels stable.
+1. Continue Milestone 4 by adding AX observers or a lightweight refresh
+   strategy for window title/focus/order updates.
+2. Broaden config parsing if more YAML settings are introduced.
+3. Add tests once a usable XCTest/Swift Testing toolchain is available.
 4. Add Developer ID signing/notarization when distribution becomes necessary.
 
 ## Definition of Done for MVP v0.1
