@@ -17,6 +17,7 @@ shell validates:
 - layout-aware key translation for Latin keyboard layouts;
 - key mapping mode setting;
 - visual assignment editor in Settings;
+- Launch at Login setting;
 - `.app` bundle packaging with Info.plist and app icon.
 
 See [PROJECT_PLAN.md](PROJECT_PLAN.md) for the product plan and milestones.
@@ -72,6 +73,9 @@ Key mapping mode is configurable in Settings:
   layout.
 - `Active layout` uses the active Latin macOS keyboard layout, with physical
   QWERTY fallback for non-Latin layouts.
+
+Launch at Login is configurable in Settings and is intended for the packaged
+`.app` build. It may not work correctly from `swift run`.
 
 To set a manual assignment, focus the target app and press
 `right cmd + right option + letter`. Manual assignments take priority over

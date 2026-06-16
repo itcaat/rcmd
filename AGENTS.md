@@ -34,6 +34,7 @@ Implemented:
 - assignment persistence in `~/.config/rcmd/config.yaml`;
 - polished OSD overlay while right Command is held;
 - visual assignment editor in Settings;
+- Launch at Login setting through `SMAppService`;
 - `.app` bundle packaging with Info.plist, generated AppIcon.icns, DMG output,
   and ad-hoc signing.
 

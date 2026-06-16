@@ -6,6 +6,7 @@ final class RcmdApp: NSObject, NSApplicationDelegate {
     private let appState = AppStateModel()
     private let assignmentStore: AssignmentStore
     private let appRegistry: AppRegistry
+    private let launchAtLoginController = LaunchAtLoginController()
     private let eventTapController = EventTapController()
     private var menuBarController: MenuBarController?
     private var settingsWindowController: SettingsWindowController?
@@ -35,6 +36,9 @@ final class RcmdApp: NSObject, NSApplicationDelegate {
                 },
                 setKeyMappingMode: { [weak self] mode in
                     self?.setKeyMappingMode(mode)
+                },
+                setLaunchAtLogin: { [weak self] enabled in
+                    self?.setLaunchAtLoginEnabled(enabled)
                 }
             )
         )
@@ -68,6 +72,7 @@ final class RcmdApp: NSObject, NSApplicationDelegate {
 
         refreshAccessibilityAndStartMonitorIfReady()
         refreshKeyMappingMode()
+        refreshLaunchAtLogin()
         refreshAssignments()
         refreshAppCatalog()
         installWorkspaceObservers()
@@ -179,6 +184,10 @@ final class RcmdApp: NSObject, NSApplicationDelegate {
         appState.refreshKeyMappingMode(assignmentStore.keyMappingMode)
     }
 
+    private func refreshLaunchAtLogin() {
+        appState.refreshLaunchAtLogin(launchAtLoginController.currentState())
+    }
+
     func assign(bundleIdentifier: String, to letter: Character) {
         let result = appRegistry.assign(bundleIdentifier: bundleIdentifier, to: letter)
         appState.recordManualAssignmentResult(result)
@@ -199,6 +208,13 @@ final class RcmdApp: NSObject, NSApplicationDelegate {
         assignmentStore.setKeyMappingMode(mode)
         refreshKeyMappingMode()
         appState.recordKeyMappingModeChange(mode)
+        menuBarController?.refresh()
+    }
+
+    func setLaunchAtLoginEnabled(_ enabled: Bool) {
+        let result = launchAtLoginController.setEnabled(enabled)
+        refreshLaunchAtLogin()
+        appState.recordLaunchAtLoginResult(result)
         menuBarController?.refresh()
     }
 

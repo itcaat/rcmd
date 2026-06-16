@@ -39,6 +39,7 @@ Done:
 - Assignments persist in `~/.config/rcmd/config.yaml`.
 - Holding right Command opens a polished, scrollable OSD assignment overlay.
 - Visual assignment editor exists in Settings.
+- Launch at Login setting exists through `SMAppService`.
 - GitHub Actions CI exists for branch pushes and pull requests.
 - Tag-driven GitHub Actions release publishing exists for `v*.*.*` tags.
 - Local `make` targets exist for CI, DMG packaging, and release tag creation.

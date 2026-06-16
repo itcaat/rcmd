@@ -5,6 +5,7 @@ struct SettingsActions {
     let assignApp: @MainActor (_ bundleIdentifier: String, _ letter: Character) -> Void
     let removeManualAssignment: @MainActor (_ letter: Character) -> Void
     let setKeyMappingMode: @MainActor (_ mode: KeyMappingMode) -> Void
+    let setLaunchAtLogin: @MainActor (_ enabled: Bool) -> Void
 }
 
 @MainActor

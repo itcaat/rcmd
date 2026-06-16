@@ -39,6 +39,8 @@ struct SettingsView: View {
                     .font(.system(.caption, design: .monospaced))
                     .foregroundStyle(.secondary)
 
+                launchAtLoginControl
+
                 keyMappingModeControl
 
                 assignmentEditor
@@ -111,6 +113,22 @@ struct SettingsView: View {
                         .fontWeight(.medium)
                 }
             }
+        }
+    }
+
+    private var launchAtLoginControl: some View {
+        VStack(alignment: .leading, spacing: 6) {
+            Toggle(
+                "Launch at Login",
+                isOn: Binding(
+                    get: { appState.launchAtLoginEnabled },
+                    set: { enabled in actions.setLaunchAtLogin(enabled) }
+                )
+            )
+
+            Text(appState.launchAtLoginStatus)
+                .font(.caption)
+                .foregroundStyle(.secondary)
         }
     }
 

@@ -9,6 +9,8 @@ final class AppStateModel: ObservableObject {
     @Published private(set) var assignments: [AppAssignment] = []
     @Published private(set) var appCatalog: [AppCatalogEntry] = []
     @Published private(set) var keyMappingMode: KeyMappingMode = .activeLayout
+    @Published private(set) var launchAtLoginEnabled = false
+    @Published private(set) var launchAtLoginStatus = "Unknown"
     @Published private(set) var lastShortcutMessage = "No shortcut handled yet."
 
     func refreshAccessibilityStatus() {
@@ -25,6 +27,11 @@ final class AppStateModel: ObservableObject {
 
     func refreshKeyMappingMode(_ mode: KeyMappingMode) {
         keyMappingMode = mode
+    }
+
+    func refreshLaunchAtLogin(_ state: LaunchAtLoginState) {
+        launchAtLoginEnabled = state.isEnabled
+        launchAtLoginStatus = state.statusText
     }
 
     func record(event: KeyEvent) {
@@ -70,6 +77,13 @@ final class AppStateModel: ObservableObject {
 
     func recordKeyMappingModeChange(_ mode: KeyMappingMode) {
         lastShortcutMessage = "Key mapping mode set to \(mode.displayName)."
+        statusMessage = lastShortcutMessage
+
+        AppLog.app.info("\(self.lastShortcutMessage, privacy: .public)")
+    }
+
+    func recordLaunchAtLoginResult(_ result: LaunchAtLoginResult) {
+        lastShortcutMessage = result.displayMessage
         statusMessage = lastShortcutMessage
 
         AppLog.app.info("\(self.lastShortcutMessage, privacy: .public)")
