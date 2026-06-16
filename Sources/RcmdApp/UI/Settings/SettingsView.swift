@@ -55,9 +55,7 @@ struct SettingsView: View {
                     } else {
                         LazyVGrid(columns: [GridItem(.adaptive(minimum: 170), spacing: 8)], alignment: .leading, spacing: 8) {
                             ForEach(appState.assignments) { assignment in
-                                Text(assignment.displayText)
-                                    .font(.system(.caption, design: .monospaced))
-                                    .lineLimit(1)
+                                assignmentSummaryRow(assignment)
                             }
                         }
                     }
@@ -204,9 +202,7 @@ struct SettingsView: View {
             } else {
                 ForEach(manualAssignments) { assignment in
                     HStack(spacing: 8) {
-                        Text(assignment.displayText)
-                            .font(.system(.caption, design: .monospaced))
-                            .lineLimit(1)
+                        assignmentSummaryRow(assignment)
 
                         Spacer()
 
@@ -217,6 +213,41 @@ struct SettingsView: View {
                 }
             }
         }
+    }
+
+    private func assignmentSummaryRow(_ assignment: AppAssignment) -> some View {
+        HStack(spacing: 8) {
+            Text(String(assignment.letter).uppercased())
+                .font(.system(.caption, design: .monospaced).weight(.semibold))
+                .frame(width: 22, height: 22)
+                .background(assignment.isManual ? Color.accentColor.opacity(0.18) : Color.secondary.opacity(0.12))
+                .clipShape(RoundedRectangle(cornerRadius: 5, style: .continuous))
+
+            AppIconView(appURL: assignment.appURL, size: 20)
+
+            VStack(alignment: .leading, spacing: 1) {
+                Text(assignment.appName)
+                    .font(.caption)
+                    .lineLimit(1)
+
+                Text(assignmentDetailText(assignment))
+                    .font(.caption2)
+                    .foregroundStyle(.secondary)
+                    .lineLimit(1)
+            }
+            .frame(minWidth: 0, maxWidth: .infinity, alignment: .leading)
+        }
+        .frame(height: 28)
+    }
+
+    private func assignmentDetailText(_ assignment: AppAssignment) -> String {
+        let state = assignment.isRunning ? "running" : "closed"
+
+        if assignment.isManual {
+            return "\(state), manual"
+        }
+
+        return state
     }
 
     private func syncDefaultSelectedApp() {

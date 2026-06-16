@@ -71,6 +71,8 @@ struct OSDView: View {
                 .background(assignment.isManual ? Color.accentColor.opacity(0.24) : Color.secondary.opacity(0.14))
                 .clipShape(RoundedRectangle(cornerRadius: 6, style: .continuous))
 
+            AppIconView(appURL: assignment.appURL, size: 24)
+
             VStack(alignment: .leading, spacing: 1) {
                 Text(assignment.appName)
                     .font(.callout)

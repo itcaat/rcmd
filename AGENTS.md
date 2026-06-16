@@ -32,8 +32,8 @@ Implemented:
 - `right cmd + letter` focusing or launching assigned apps;
 - manual assignment capture with `right cmd + right option + letter`;
 - assignment persistence in `~/.config/rcmd/config.yaml`;
-- polished OSD overlay while right Command is held;
-- visual assignment editor in Settings;
+- polished OSD overlay with app icons while right Command is held;
+- visual assignment editor with app icons in Settings;
 - Launch at Login setting through `SMAppService`;
 - `.app` bundle packaging with Info.plist, generated AppIcon.icns, DMG output,
   and ad-hoc signing.

@@ -37,8 +37,9 @@ Done:
 - `right cmd + letter` can focus or launch assigned apps.
 - Manual assignment capture exists through `right cmd + right option + letter`.
 - Assignments persist in `~/.config/rcmd/config.yaml`.
-- Holding right Command opens a polished, scrollable OSD assignment overlay.
-- Visual assignment editor exists in Settings.
+- Holding right Command opens a polished, scrollable OSD assignment overlay
+  with app icons.
+- Visual assignment editor with app icons exists in Settings.
 - Launch at Login setting exists through `SMAppService`.
 - GitHub Actions CI exists for branch pushes and pull requests.
 - Tag-driven GitHub Actions release publishing exists for `v*.*.*` tags.

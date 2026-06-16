@@ -13,10 +13,10 @@ shell validates:
 - dynamic assignments for running and installed apps;
 - `right cmd + letter` focusing or launching assigned apps;
 - manual assignments persisted in `~/.config/rcmd/config.yaml`;
-- polished OSD overlay while right Command is held;
+- polished OSD overlay with app icons while right Command is held;
 - layout-aware key translation for Latin keyboard layouts;
 - key mapping mode setting;
-- visual assignment editor in Settings;
+- visual assignment editor with app icons in Settings;
 - Launch at Login setting;
 - `.app` bundle packaging with Info.plist and app icon.
 
@@ -65,7 +65,8 @@ automatically after permission is granted.
 After permission is granted, hold right Command to show the OSD assignment
 overlay. Press one of the listed letters to focus a running app or launch a
 closed app. The OSD is scrollable for larger assignment lists and appears on
-the screen containing the pointer.
+the screen containing the pointer. OSD and Settings assignment rows show app
+icons when the app bundle can be resolved.
 
 Key mapping mode is configurable in Settings:
 
