@@ -29,6 +29,7 @@ final class EventTapController {
     private var rightCommandHeld = false
     private var rightOptionHeld = false
     private var consumedKeyCodes = Set<Int64>()
+    private var modifierReconciliationWorkItem: DispatchWorkItem?
 
     var isRunning: Bool {
         guard let eventTap else {
@@ -89,10 +90,10 @@ final class EventTapController {
 
         eventTap = nil
         runLoopSource = nil
-        rightCommandHeld = false
+        modifierReconciliationWorkItem?.cancel()
+        modifierReconciliationWorkItem = nil
+        resetRightCommandState()
         rightOptionHeld = false
-        consumedKeyCodes.removeAll()
-        emitRightCommandChanged(false)
         AppLog.hotkeys.info("Keyboard event tap stopped")
     }
 
@@ -103,6 +104,8 @@ final class EventTapController {
             }
 
             emit(KeyEvent(kind: .tapDisabled, keyCode: -1, rawFlags: 0, timestamp: Date()))
+            resetRightCommandState()
+            rightOptionHeld = false
             return Unmanaged.passUnretained(event)
         }
 
@@ -114,6 +117,7 @@ final class EventTapController {
         )
 
         emit(keyEvent)
+        reconcileModifierState(from: keyEvent)
 
         if keyEvent.kind == .flagsChanged, keyEvent.isRightCommandKey {
             let wasHeld = rightCommandHeld
@@ -146,10 +150,58 @@ final class EventTapController {
             consumedKeyCodes.insert(keyEvent.keyCode)
             let shortcutKind: KeyShortcutKind = rightOptionHeld ? .assign : .activate
             emit(KeyShortcut(kind: shortcutKind, letter: letter, keyCode: keyEvent.keyCode, timestamp: Date()))
+            scheduleModifierStateReconciliation()
             return nil
         }
 
         return Unmanaged.passUnretained(event)
+    }
+
+    private func reconcileModifierState(from event: KeyEvent) {
+        guard event.kind == .keyDown || event.kind == .keyUp else {
+            return
+        }
+
+        if rightCommandHeld, !event.commandDown {
+            resetRightCommandState()
+        }
+
+        if rightOptionHeld, !event.optionDown {
+            rightOptionHeld = false
+        }
+    }
+
+    private func scheduleModifierStateReconciliation() {
+        modifierReconciliationWorkItem?.cancel()
+
+        let workItem = DispatchWorkItem { [weak self] in
+            self?.reconcileModifierStateFromSystemFlags()
+        }
+        modifierReconciliationWorkItem = workItem
+
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.35, execute: workItem)
+    }
+
+    private func reconcileModifierStateFromSystemFlags() {
+        let flags = CGEventSource.flagsState(.combinedSessionState)
+
+        if rightCommandHeld, !flags.contains(.maskCommand) {
+            resetRightCommandState()
+        }
+
+        if rightOptionHeld, !flags.contains(.maskAlternate) {
+            rightOptionHeld = false
+        }
+    }
+
+    private func resetRightCommandState() {
+        let wasHeld = rightCommandHeld
+        rightCommandHeld = false
+        consumedKeyCodes.removeAll()
+
+        if wasHeld {
+            emitRightCommandChanged(false)
+        }
     }
 
     private func emit(_ event: KeyEvent) {

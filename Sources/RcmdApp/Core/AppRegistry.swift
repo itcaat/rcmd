@@ -1,4 +1,5 @@
 import AppKit
+import ApplicationServices
 import Foundation
 
 struct AppAssignment: Identifiable, Sendable, Equatable {
@@ -154,6 +155,8 @@ final class AppRegistry {
         if let app = workspace.runningApplications.first(where: { runningApp in
             runningApp.bundleIdentifier == assignment.bundleIdentifier
         }) {
+            app.unhide()
+            restoreMinimizedWindows(for: app)
             app.activate(options: [.activateAllWindows])
             AppLog.app.info("Focused \(assignment.appName, privacy: .public) for \(String(normalizedLetter), privacy: .public)")
             return .focused(assignment)
@@ -436,6 +439,36 @@ final class AppRegistry {
         workspace.runningApplications.contains { app in
             app.bundleIdentifier == bundleIdentifier
         }
+    }
+
+    private func restoreMinimizedWindows(for app: NSRunningApplication) {
+        guard AccessibilityPermission.isTrusted, app.processIdentifier > 0 else {
+            return
+        }
+
+        let appElement = AXUIElementCreateApplication(app.processIdentifier)
+        guard let windowElements = copyAttribute("AXWindows", from: appElement) as? [AXUIElement] else {
+            return
+        }
+
+        for windowElement in windowElements {
+            guard copyAttribute("AXMinimized", from: windowElement) as? Bool == true else {
+                continue
+            }
+
+            AXUIElementSetAttributeValue(windowElement, "AXMinimized" as CFString, kCFBooleanFalse)
+        }
+    }
+
+    private func copyAttribute(_ attribute: String, from element: AXUIElement) -> CFTypeRef? {
+        var value: CFTypeRef?
+        let result = AXUIElementCopyAttributeValue(element, attribute as CFString, &value)
+
+        guard result == .success else {
+            return nil
+        }
+
+        return value
     }
 
     private func appSortKey(_ app: InstalledApplication) -> String {
