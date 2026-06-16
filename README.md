@@ -8,8 +8,10 @@ shell validates:
 - menu bar utility lifecycle;
 - Settings window;
 - Accessibility permission request/status;
-- listen-only `CGEventTap`;
-- right/left Command key event logging.
+- active `CGEventTap`;
+- right/left Command key event logging;
+- dynamic assignments for regular running apps;
+- `right cmd + letter` focusing of assigned running apps.
 
 See [PROJECT_PLAN.md](PROJECT_PLAN.md) for the product plan and milestones.
 See [AGENTS.md](AGENTS.md) for instructions for future AI agents.
@@ -26,9 +28,21 @@ swift build
 swift run rcmd-app
 ```
 
-The app launches as a menu bar utility named `rcmd`. If Accessibility
-permission is missing, open Settings from the menu bar and click
-`Request Permission`, then grant the app in macOS System Settings.
+The app launches as a menu bar utility with a keyboard icon and `rcmd` text in
+the top-right macOS menu bar. If Accessibility permission is missing, the
+Settings window should also open automatically. Click `Request Permission`,
+then grant the app in macOS System Settings.
+
+After permission is granted, open Settings to see dynamic running app
+assignments. Hold right Command and press one of the listed letters to focus
+that running app. The current key mapping is QWERTY key-code based and is not
+layout-aware yet.
+
+If the menu bar item is not visible, check whether the process is still running:
+
+```sh
+pgrep -fl rcmd-app
+```
 
 ## Logs
 
@@ -40,8 +54,8 @@ log stream --level debug --style compact --predicate 'subsystem == "dev.local.rc
 
 ## Current Limitations
 
-- No app switching behavior yet.
-- No dynamic assignments yet.
+- No app launching behavior yet.
+- No custom assignments yet.
 - No OSD yet.
 - No YAML config yet.
 - No tests yet; the currently selected CommandLineTools install does not expose

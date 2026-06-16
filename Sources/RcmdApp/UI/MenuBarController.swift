@@ -20,7 +20,9 @@ final class MenuBarController {
         statusItem = NSStatusBar.system.statusItem(withLength: NSStatusItem.variableLength)
 
         if let button = statusItem.button {
-            button.title = "rcmd"
+            button.title = " rcmd"
+            button.image = NSImage(systemSymbolName: "keyboard", accessibilityDescription: "rcmd")
+            button.imagePosition = .imageLeading
             button.toolTip = "rcmd bootstrap"
         }
 

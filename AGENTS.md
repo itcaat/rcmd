@@ -23,16 +23,20 @@ Implemented:
 - native macOS menu bar app shell;
 - Settings window;
 - Accessibility permission status/request helper;
-- listen-only `CGEventTap`;
-- basic right/left Command key event logging.
+- active `CGEventTap`;
+- basic right/left Command key event logging;
+- QWERTY key-code based letter mapping;
+- dynamic assignments for regular running apps;
+- `right cmd + letter` focusing of assigned running apps.
 
 Not implemented:
 
 - app switching;
-- dynamic assignments;
+- app launching;
 - custom assignments;
 - OSD;
 - YAML config;
+- keyboard-layout aware key mapping;
 - Xcode project;
 - no tests;
 - no build or release pipeline.
@@ -41,14 +45,12 @@ Not implemented:
 
 Start with MVP v0.1 from `PROJECT_PLAN.md`.
 
-The next practical task is to turn the keyboard foundation into the first app
-switching behavior:
+The next practical task is to complete the first MVP app-switching loop:
 
-1. track whether right Command is held;
-2. map letter key codes to characters;
-3. build a minimal `AppRegistry` from running apps;
-4. focus one assigned running app with `right cmd + letter`;
-5. add a simple on-screen display after the behavior is proven.
+1. add app launching for assigned apps that are not running;
+2. add persistent manual assignments;
+3. replace QWERTY key-code mapping with layout-aware character resolution;
+4. add a simple on-screen display for current assignments.
 
 Do not start with Spaces, Stages, licensing, or Cmd-Tab replacement. Those are
 later milestones and depend on the app/window foundation.

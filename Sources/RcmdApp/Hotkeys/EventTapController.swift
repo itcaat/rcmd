@@ -20,9 +20,12 @@ enum EventTapError: LocalizedError {
 
 final class EventTapController {
     var onEvent: (@MainActor (KeyEvent) -> Void)?
+    var onShortcut: (@MainActor (KeyShortcut) -> Void)?
 
     private var eventTap: CFMachPort?
     private var runLoopSource: CFRunLoopSource?
+    private var rightCommandHeld = false
+    private var consumedKeyCodes = Set<Int64>()
 
     var isRunning: Bool {
         guard let eventTap else {
@@ -50,7 +53,7 @@ final class EventTapController {
         guard let tap = CGEvent.tapCreate(
             tap: .cgSessionEventTap,
             place: .headInsertEventTap,
-            options: .listenOnly,
+            options: .defaultTap,
             eventsOfInterest: mask,
             callback: eventTapCallback,
             userInfo: Unmanaged.passUnretained(self).toOpaque()
@@ -83,6 +86,8 @@ final class EventTapController {
 
         eventTap = nil
         runLoopSource = nil
+        rightCommandHeld = false
+        consumedKeyCodes.removeAll()
         AppLog.hotkeys.info("Keyboard event tap stopped")
     }
 
@@ -104,6 +109,29 @@ final class EventTapController {
         )
 
         emit(keyEvent)
+
+        if keyEvent.kind == .flagsChanged, keyEvent.isRightCommandKey {
+            rightCommandHeld = keyEvent.commandDown
+            if !rightCommandHeld {
+                consumedKeyCodes.removeAll()
+            }
+
+            return Unmanaged.passUnretained(event)
+        }
+
+        if keyEvent.kind == .keyUp, consumedKeyCodes.remove(keyEvent.keyCode) != nil {
+            return nil
+        }
+
+        if keyEvent.kind == .keyDown,
+           rightCommandHeld,
+           event.getIntegerValueField(.keyboardEventAutorepeat) == 0,
+           let letter = KeyboardLayout.letter(for: keyEvent.keyCode) {
+            consumedKeyCodes.insert(keyEvent.keyCode)
+            emit(KeyShortcut(letter: letter, keyCode: keyEvent.keyCode, timestamp: Date()))
+            return nil
+        }
+
         return Unmanaged.passUnretained(event)
     }
 
@@ -114,6 +142,16 @@ final class EventTapController {
 
         Task { @MainActor in
             onEvent(event)
+        }
+    }
+
+    private func emit(_ shortcut: KeyShortcut) {
+        guard let onShortcut else {
+            return
+        }
+
+        Task { @MainActor in
+            onShortcut(shortcut)
         }
     }
 }

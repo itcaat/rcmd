@@ -10,7 +10,7 @@ struct SettingsView: View {
                     .font(.title2)
                     .fontWeight(.semibold)
 
-                Text("This build validates the menu bar shell, Accessibility permission flow, and right Command key event logging.")
+                Text("This build validates the menu bar shell, Accessibility flow, right Command routing, and focusing assigned running apps.")
                     .foregroundStyle(.secondary)
                     .fixedSize(horizontal: false, vertical: true)
             }
@@ -31,6 +31,10 @@ struct SettingsView: View {
                 .foregroundStyle(.secondary)
                 .fixedSize(horizontal: false, vertical: true)
 
+            Text(appState.lastShortcutMessage)
+                .font(.system(.caption, design: .monospaced))
+                .foregroundStyle(.secondary)
+
             HStack {
                 Button("Request Permission") {
                     AccessibilityPermission.request()
@@ -38,6 +42,24 @@ struct SettingsView: View {
                 }
 
                 Spacer()
+            }
+
+            VStack(alignment: .leading, spacing: 8) {
+                Text("Dynamic running app assignments")
+                    .font(.headline)
+
+                if appState.assignments.isEmpty {
+                    Text("No regular running apps found.")
+                        .foregroundStyle(.secondary)
+                } else {
+                    LazyVGrid(columns: [GridItem(.adaptive(minimum: 150), spacing: 8)], alignment: .leading, spacing: 8) {
+                        ForEach(appState.assignments) { assignment in
+                            Text(assignment.displayText)
+                                .font(.system(.caption, design: .monospaced))
+                                .lineLimit(1)
+                        }
+                    }
+                }
             }
 
             VStack(alignment: .leading, spacing: 8) {

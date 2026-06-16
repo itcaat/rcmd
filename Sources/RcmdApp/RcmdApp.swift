@@ -1,17 +1,19 @@
 import AppKit
 import Foundation
 
-@main
 @MainActor
 final class RcmdApp: NSObject, NSApplicationDelegate {
     private let appState = AppStateModel()
+    private let appRegistry = AppRegistry()
     private let eventTapController = EventTapController()
     private var menuBarController: MenuBarController?
     private var settingsWindowController: SettingsWindowController?
     private var permissionTimer: Timer?
+    private var workspaceObservers: [NSObjectProtocol] = []
 
     func applicationDidFinishLaunching(_ notification: Notification) {
         NSApp.setActivationPolicy(.accessory)
+        AppLog.app.info("rcmd app did finish launching")
 
         settingsWindowController = SettingsWindowController(appState: appState)
         menuBarController = MenuBarController(
@@ -33,7 +35,13 @@ final class RcmdApp: NSObject, NSApplicationDelegate {
             self?.appState.record(event: event)
         }
 
+        eventTapController.onShortcut = { [weak self] shortcut in
+            self?.handle(shortcut: shortcut)
+        }
+
         appState.refreshAccessibilityStatus()
+        refreshAssignments()
+        installWorkspaceObservers()
         menuBarController?.refresh()
 
         permissionTimer = Timer.scheduledTimer(withTimeInterval: 2.0, repeats: true) { [weak self] _ in
@@ -53,6 +61,9 @@ final class RcmdApp: NSObject, NSApplicationDelegate {
     func applicationWillTerminate(_ notification: Notification) {
         stopEventTap()
         permissionTimer?.invalidate()
+        workspaceObservers.forEach { observer in
+            NSWorkspace.shared.notificationCenter.removeObserver(observer)
+        }
     }
 
     private func showSettings() {
@@ -80,5 +91,38 @@ final class RcmdApp: NSObject, NSApplicationDelegate {
         appState.eventTapRunning = false
         appState.statusMessage = "Keyboard monitor is stopped."
         menuBarController?.refresh()
+    }
+
+    private func handle(shortcut: KeyShortcut) {
+        refreshAssignments()
+        let assignment = appRegistry.focusAssignedApp(for: shortcut.letter)
+        appState.record(shortcut: shortcut, focused: assignment)
+        refreshAssignments()
+        menuBarController?.refresh()
+    }
+
+    private func refreshAssignments() {
+        appState.refreshAssignments(appRegistry.currentAssignments())
+    }
+
+    private func installWorkspaceObservers() {
+        let notificationCenter = NSWorkspace.shared.notificationCenter
+        let notifications: [NSNotification.Name] = [
+            NSWorkspace.didLaunchApplicationNotification,
+            NSWorkspace.didTerminateApplicationNotification,
+            NSWorkspace.didActivateApplicationNotification
+        ]
+
+        workspaceObservers = notifications.map { notificationName in
+            notificationCenter.addObserver(
+                forName: notificationName,
+                object: nil,
+                queue: .main
+            ) { [weak self] _ in
+                Task { @MainActor in
+                    self?.refreshAssignments()
+                }
+            }
+        }
     }
 }
