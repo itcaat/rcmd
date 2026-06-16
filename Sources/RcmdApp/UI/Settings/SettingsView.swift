@@ -24,10 +24,7 @@ struct SettingsView: View {
 
                 Divider()
 
-                statusRow(
-                    title: "Accessibility",
-                    value: appState.accessibilityTrusted ? "Granted" : "Missing"
-                )
+                accessibilityStatusRow
 
                 statusRow(
                     title: "Keyboard monitor",
@@ -41,15 +38,6 @@ struct SettingsView: View {
                 Text(appState.lastShortcutMessage)
                     .font(.system(.caption, design: .monospaced))
                     .foregroundStyle(.secondary)
-
-                HStack {
-                    Button("Request Permission") {
-                        AccessibilityPermission.request()
-                        appState.refreshAccessibilityStatus()
-                    }
-
-                    Spacer()
-                }
 
                 keyMappingModeControl
 
@@ -103,6 +91,26 @@ struct SettingsView: View {
             Spacer()
             Text(value)
                 .fontWeight(.medium)
+        }
+    }
+
+    private var accessibilityStatusRow: some View {
+        HStack {
+            Text("Accessibility")
+            Spacer()
+
+            if appState.accessibilityTrusted {
+                Text("Granted")
+                    .fontWeight(.medium)
+            } else {
+                Button {
+                    AccessibilityPermission.request()
+                    appState.refreshAccessibilityStatus()
+                } label: {
+                    Text("Missing")
+                        .fontWeight(.medium)
+                }
+            }
         }
     }
 
