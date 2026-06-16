@@ -27,13 +27,14 @@ Implemented:
 - basic right/left Command key event logging;
 - QWERTY key-code based letter mapping;
 - dynamic assignments for running and installed apps;
-- `right cmd + letter` focusing or launching assigned apps.
+- `right cmd + letter` focusing or launching assigned apps;
+- manual assignment capture with `right cmd + right option + letter`;
+- assignment persistence in `~/.config/rcmd/config.yaml`.
 
 Not implemented:
 
-- custom assignments;
+- visual assignment editor;
 - OSD;
-- YAML config;
 - keyboard-layout aware key mapping;
 - Xcode project;
 - no tests;
@@ -45,10 +46,10 @@ Start with MVP v0.1 from `PROJECT_PLAN.md`.
 
 The next practical task is to complete the first MVP app-switching loop:
 
-1. add persistent manual assignments;
-2. implement `right cmd + right option + letter` assignment capture;
-3. replace QWERTY key-code mapping with layout-aware character resolution;
-4. add a simple on-screen display for current assignments.
+1. add a simple on-screen display for current assignments;
+2. replace QWERTY key-code mapping with layout-aware character resolution;
+3. add a visual assignment editor;
+4. improve config parsing if broader YAML settings are added.
 
 Do not start with Spaces, Stages, licensing, or Cmd-Tab replacement. Those are
 later milestones and depend on the app/window foundation.

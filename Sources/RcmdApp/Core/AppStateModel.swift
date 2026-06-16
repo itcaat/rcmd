@@ -36,4 +36,11 @@ final class AppStateModel: ObservableObject {
 
         AppLog.hotkeys.info("\(self.lastShortcutMessage, privacy: .public)")
     }
+
+    func record(shortcut: KeyShortcut, assignmentResult: ManualAssignmentResult) {
+        lastShortcutMessage = "\(shortcut.displayDescription): \(assignmentResult.displayMessage)"
+        statusMessage = lastShortcutMessage
+
+        AppLog.hotkeys.info("\(self.lastShortcutMessage, privacy: .public)")
+    }
 }

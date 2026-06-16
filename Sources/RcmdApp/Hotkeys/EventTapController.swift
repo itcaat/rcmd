@@ -25,6 +25,7 @@ final class EventTapController {
     private var eventTap: CFMachPort?
     private var runLoopSource: CFRunLoopSource?
     private var rightCommandHeld = false
+    private var rightOptionHeld = false
     private var consumedKeyCodes = Set<Int64>()
 
     var isRunning: Bool {
@@ -87,6 +88,7 @@ final class EventTapController {
         eventTap = nil
         runLoopSource = nil
         rightCommandHeld = false
+        rightOptionHeld = false
         consumedKeyCodes.removeAll()
         AppLog.hotkeys.info("Keyboard event tap stopped")
     }
@@ -113,9 +115,15 @@ final class EventTapController {
         if keyEvent.kind == .flagsChanged, keyEvent.isRightCommandKey {
             rightCommandHeld = keyEvent.commandDown
             if !rightCommandHeld {
+                rightOptionHeld = false
                 consumedKeyCodes.removeAll()
             }
 
+            return Unmanaged.passUnretained(event)
+        }
+
+        if keyEvent.kind == .flagsChanged, keyEvent.isRightOptionKey {
+            rightOptionHeld = keyEvent.optionDown
             return Unmanaged.passUnretained(event)
         }
 
@@ -128,7 +136,8 @@ final class EventTapController {
            event.getIntegerValueField(.keyboardEventAutorepeat) == 0,
            let letter = KeyboardLayout.letter(for: keyEvent.keyCode) {
             consumedKeyCodes.insert(keyEvent.keyCode)
-            emit(KeyShortcut(letter: letter, keyCode: keyEvent.keyCode, timestamp: Date()))
+            let shortcutKind: KeyShortcutKind = rightOptionHeld ? .assign : .activate
+            emit(KeyShortcut(kind: shortcutKind, letter: letter, keyCode: keyEvent.keyCode, timestamp: Date()))
             return nil
         }
 

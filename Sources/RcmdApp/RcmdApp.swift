@@ -4,12 +4,20 @@ import Foundation
 @MainActor
 final class RcmdApp: NSObject, NSApplicationDelegate {
     private let appState = AppStateModel()
-    private let appRegistry = AppRegistry()
+    private let assignmentStore: AssignmentStore
+    private let appRegistry: AppRegistry
     private let eventTapController = EventTapController()
     private var menuBarController: MenuBarController?
     private var settingsWindowController: SettingsWindowController?
     private var permissionTimer: Timer?
     private var workspaceObservers: [NSObjectProtocol] = []
+
+    override init() {
+        let assignmentStore = AssignmentStore()
+        self.assignmentStore = assignmentStore
+        appRegistry = AppRegistry(assignmentStore: assignmentStore)
+        super.init()
+    }
 
     func applicationDidFinishLaunching(_ notification: Notification) {
         NSApp.setActivationPolicy(.accessory)
@@ -96,8 +104,16 @@ final class RcmdApp: NSObject, NSApplicationDelegate {
     private func handle(shortcut: KeyShortcut) {
         Task { @MainActor in
             refreshAssignments()
-            let result = await appRegistry.focusOrLaunchAssignedApp(for: shortcut.letter)
-            appState.record(shortcut: shortcut, result: result)
+
+            switch shortcut.kind {
+            case .activate:
+                let result = await appRegistry.focusOrLaunchAssignedApp(for: shortcut.letter)
+                appState.record(shortcut: shortcut, result: result)
+            case .assign:
+                let result = appRegistry.assignFrontmostApp(to: shortcut.letter)
+                appState.record(shortcut: shortcut, assignmentResult: result)
+            }
+
             refreshAssignments()
             menuBarController?.refresh()
         }

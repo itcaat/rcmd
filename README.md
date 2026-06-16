@@ -11,7 +11,8 @@ shell validates:
 - active `CGEventTap`;
 - right/left Command key event logging;
 - dynamic assignments for running and installed apps;
-- `right cmd + letter` focusing or launching assigned apps.
+- `right cmd + letter` focusing or launching assigned apps;
+- manual assignments persisted in `~/.config/rcmd/config.yaml`.
 
 See [PROJECT_PLAN.md](PROJECT_PLAN.md) for the product plan and milestones.
 See [AGENTS.md](AGENTS.md) for instructions for future AI agents.
@@ -38,6 +39,14 @@ assignments. Hold right Command and press one of the listed letters to focus a
 running app or launch a closed app. The current key mapping is QWERTY key-code
 based and is not layout-aware yet.
 
+To set a manual assignment, focus the target app and press
+`right cmd + right option + letter`. Manual assignments take priority over
+dynamic assignments and are saved to:
+
+```text
+~/.config/rcmd/config.yaml
+```
+
 If the menu bar item is not visible, check whether the process is still running:
 
 ```sh
@@ -54,8 +63,8 @@ log stream --level debug --style compact --predicate 'subsystem == "dev.local.rc
 
 ## Current Limitations
 
-- No custom assignments yet.
+- No visual assignment editor yet.
 - No OSD yet.
-- No YAML config yet.
+- YAML support is intentionally minimal and currently stores only assignments.
 - No tests yet; the currently selected CommandLineTools install does not expose
   `XCTest` or Swift `Testing`, so `swift test` reports no tests.

@@ -31,6 +31,14 @@ struct KeyEvent: Sendable, Equatable {
         keyCode == KeyCode.leftCommand
     }
 
+    var isRightOptionKey: Bool {
+        keyCode == KeyCode.rightOption
+    }
+
+    var isLeftOptionKey: Bool {
+        keyCode == KeyCode.leftOption
+    }
+
     var displayDescription: String {
         let side: String
 
@@ -38,6 +46,10 @@ struct KeyEvent: Sendable, Equatable {
             side = "right-command"
         } else if isLeftCommandKey {
             side = "left-command"
+        } else if isRightOptionKey {
+            side = "right-option"
+        } else if isLeftOptionKey {
+            side = "left-option"
         } else if let letter = KeyboardLayout.letter(for: keyCode) {
             side = "key-\(String(letter).uppercased())"
         } else {

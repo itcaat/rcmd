@@ -7,6 +7,7 @@ struct AppAssignment: Identifiable, Sendable, Equatable {
     let bundleIdentifier: String
     let appURL: URL?
     let isRunning: Bool
+    let isManual: Bool
 
     var id: String {
         "\(letter)-\(bundleIdentifier)"
@@ -14,7 +15,8 @@ struct AppAssignment: Identifiable, Sendable, Equatable {
 
     var displayText: String {
         let state = isRunning ? "running" : "closed"
-        return "\(String(letter).uppercased()) -> \(appName) (\(state))"
+        let source = isManual ? ", manual" : ""
+        return "\(String(letter).uppercased()) -> \(appName) (\(state)\(source))"
     }
 }
 
@@ -47,20 +49,53 @@ enum AppActivationResult: Sendable, Equatable {
     }
 }
 
+enum ManualAssignmentResult: Sendable, Equatable {
+    case assigned(AppAssignment)
+    case noActiveApp(Character)
+    case failed(Character, String)
+
+    var displayMessage: String {
+        switch self {
+        case .assigned(let assignment):
+            "\(String(assignment.letter).uppercased()) assigned to \(assignment.appName)."
+        case .noActiveApp(let letter):
+            "No active regular app to assign to \(String(letter).uppercased())."
+        case .failed(let letter, let message):
+            "Could not assign \(String(letter).uppercased()): \(message)"
+        }
+    }
+}
+
 @MainActor
 final class AppRegistry {
     private let workspace: NSWorkspace
+    private let assignmentStore: AssignmentStore
 
-    init(workspace: NSWorkspace = .shared) {
+    init(workspace: NSWorkspace = .shared, assignmentStore: AssignmentStore) {
         self.workspace = workspace
+        self.assignmentStore = assignmentStore
     }
 
     func currentAssignments() -> [AppAssignment] {
         var assignedLetters = Set<Character>()
+        var assignedBundleIdentifiers = Set<String>()
         var assignments: [AppAssignment] = []
 
-        addRunningAssignments(to: &assignments, assignedLetters: &assignedLetters)
-        addInstalledAssignments(to: &assignments, assignedLetters: &assignedLetters)
+        addManualAssignments(
+            to: &assignments,
+            assignedLetters: &assignedLetters,
+            assignedBundleIdentifiers: &assignedBundleIdentifiers
+        )
+        addRunningAssignments(
+            to: &assignments,
+            assignedLetters: &assignedLetters,
+            assignedBundleIdentifiers: &assignedBundleIdentifiers
+        )
+        addInstalledAssignments(
+            to: &assignments,
+            assignedLetters: &assignedLetters,
+            assignedBundleIdentifiers: &assignedBundleIdentifiers
+        )
 
         return assignments.sorted { lhs, rhs in
             String(lhs.letter) < String(rhs.letter)
@@ -104,28 +139,72 @@ final class AppRegistry {
         }
     }
 
+    func assignFrontmostApp(to letter: Character) -> ManualAssignmentResult {
+        let normalizedLetter = Character(String(letter).lowercased())
+
+        guard
+            let app = workspace.frontmostApplication,
+            app.activationPolicy == .regular,
+            let bundleIdentifier = app.bundleIdentifier
+        else {
+            return .noActiveApp(normalizedLetter)
+        }
+
+        assignmentStore.set(bundleIdentifier: bundleIdentifier, for: normalizedLetter)
+
+        guard let assignment = assignment(for: normalizedLetter, bundleIdentifier: bundleIdentifier, isManual: true) else {
+            return .failed(normalizedLetter, "saved app could not be resolved")
+        }
+
+        AppLog.app.info("Assigned \(String(normalizedLetter), privacy: .public) to \(assignment.appName, privacy: .public)")
+        return .assigned(assignment)
+    }
+
+    private func addManualAssignments(
+        to assignments: inout [AppAssignment],
+        assignedLetters: inout Set<Character>,
+        assignedBundleIdentifiers: inout Set<String>
+    ) {
+        for letter in assignmentStore.assignmentsByLetter.keys.sorted(by: { String($0) < String($1) }) {
+            guard
+                let bundleIdentifier = assignmentStore.bundleIdentifier(for: letter),
+                let assignment = assignment(for: letter, bundleIdentifier: bundleIdentifier, isManual: true)
+            else {
+                continue
+            }
+
+            assignedLetters.insert(letter)
+            assignedBundleIdentifiers.insert(bundleIdentifier)
+            assignments.append(assignment)
+        }
+    }
+
     private func addRunningAssignments(
         to assignments: inout [AppAssignment],
-        assignedLetters: inout Set<Character>
+        assignedLetters: inout Set<Character>,
+        assignedBundleIdentifiers: inout Set<String>
     ) {
         for app in regularRunningApplications() {
             guard
                 let appName = app.localizedName?.trimmingCharacters(in: .whitespacesAndNewlines),
                 let bundleIdentifier = app.bundleIdentifier,
                 let letter = firstLetter(in: appName),
-                !assignedLetters.contains(letter)
+                !assignedLetters.contains(letter),
+                !assignedBundleIdentifiers.contains(bundleIdentifier)
             else {
                 continue
             }
 
             assignedLetters.insert(letter)
+            assignedBundleIdentifiers.insert(bundleIdentifier)
             assignments.append(
                 AppAssignment(
                     letter: letter,
                     appName: appName,
                     bundleIdentifier: bundleIdentifier,
                     appURL: app.bundleURL,
-                    isRunning: true
+                    isRunning: true,
+                    isManual: false
                 )
             )
         }
@@ -133,24 +212,28 @@ final class AppRegistry {
 
     private func addInstalledAssignments(
         to assignments: inout [AppAssignment],
-        assignedLetters: inout Set<Character>
+        assignedLetters: inout Set<Character>,
+        assignedBundleIdentifiers: inout Set<String>
     ) {
         for app in installedApplications() {
             guard
                 let letter = firstLetter(in: app.appName),
-                !assignedLetters.contains(letter)
+                !assignedLetters.contains(letter),
+                !assignedBundleIdentifiers.contains(app.bundleIdentifier)
             else {
                 continue
             }
 
             assignedLetters.insert(letter)
+            assignedBundleIdentifiers.insert(app.bundleIdentifier)
             assignments.append(
                 AppAssignment(
                     letter: letter,
                     appName: app.appName,
                     bundleIdentifier: app.bundleIdentifier,
                     appURL: app.appURL,
-                    isRunning: isRunning(bundleIdentifier: app.bundleIdentifier)
+                    isRunning: isRunning(bundleIdentifier: app.bundleIdentifier),
+                    isManual: false
                 )
             )
         }
@@ -200,6 +283,46 @@ final class AppRegistry {
         return appsByBundleID.values.sorted { lhs, rhs in
             lhs.appName.localizedCaseInsensitiveCompare(rhs.appName) == .orderedAscending
         }
+    }
+
+    private func assignment(
+        for letter: Character,
+        bundleIdentifier: String,
+        isManual: Bool
+    ) -> AppAssignment? {
+        if let runningApp = workspace.runningApplications.first(where: { $0.bundleIdentifier == bundleIdentifier }) {
+            let appName = runningApp.localizedName?.trimmingCharacters(in: .whitespacesAndNewlines)
+                ?? bundleIdentifier
+
+            return AppAssignment(
+                letter: letter,
+                appName: appName,
+                bundleIdentifier: bundleIdentifier,
+                appURL: runningApp.bundleURL,
+                isRunning: true,
+                isManual: isManual
+            )
+        }
+
+        if let installedApp = installedApplications().first(where: { $0.bundleIdentifier == bundleIdentifier }) {
+            return AppAssignment(
+                letter: letter,
+                appName: installedApp.appName,
+                bundleIdentifier: bundleIdentifier,
+                appURL: installedApp.appURL,
+                isRunning: false,
+                isManual: isManual
+            )
+        }
+
+        return AppAssignment(
+            letter: letter,
+            appName: bundleIdentifier,
+            bundleIdentifier: bundleIdentifier,
+            appURL: nil,
+            isRunning: false,
+            isManual: isManual
+        )
     }
 
     private func applicationSearchDirectories() -> [URL] {
