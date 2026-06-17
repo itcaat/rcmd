@@ -69,6 +69,12 @@ enum KeyCode {
     static let rightCommand: Int64 = 54
     static let leftOption: Int64 = 58
     static let rightOption: Int64 = 61
+    static let `return`: Int64 = 36
     static let tab: Int64 = 48
     static let space: Int64 = 49
+    static let delete: Int64 = 51
+    static let escape: Int64 = 53
+    static let keypadEnter: Int64 = 76
+    static let arrowDown: Int64 = 125
+    static let arrowUp: Int64 = 126
 }

@@ -4,10 +4,7 @@ struct OSDView: View {
     @ObservedObject var appState: AppStateModel
     let actions: OSDActions
 
-    @State private var query = ""
-    @State private var selectedWindowID: WindowInfo.ID?
     @State private var searchWindows: [WindowInfo] = []
-    @FocusState private var queryFocused: Bool
 
     private let columns = [
         GridItem(.adaptive(minimum: 178), spacing: 8)
@@ -15,31 +12,20 @@ struct OSDView: View {
     private let contentHeight: CGFloat = 340
 
     private var filteredWindows: [WindowInfo] {
-        let normalizedQuery = query.trimmingCharacters(in: .whitespacesAndNewlines)
-        let tokens = normalizedQuery
-            .lowercased()
-            .split(separator: " ")
-            .map(String.init)
-
-        guard !tokens.isEmpty else {
-            return searchWindows
-        }
-
-        return searchWindows.filter { window in
-            let searchableText = "\(window.appName) \(window.displayTitle) \(window.bundleIdentifier)"
-                .lowercased()
-
-            return tokens.allSatisfy { searchableText.contains($0) }
-        }
+        WindowSearchFilter.filteredWindows(searchWindows, query: appState.windowSearchQuery)
     }
 
     private var selectedWindow: WindowInfo? {
-        if let selectedWindowID,
-           let selectedWindow = filteredWindows.first(where: { $0.id == selectedWindowID }) {
+        if let selectedWindowID = appState.selectedWindowID,
+           let selectedWindow = displayedWindows.first(where: { $0.id == selectedWindowID }) {
             return selectedWindow
         }
 
-        return filteredWindows.first
+        return displayedWindows.first
+    }
+
+    private var displayedWindows: [WindowInfo] {
+        Array(filteredWindows.prefix(18))
     }
 
     var body: some View {
@@ -63,20 +49,15 @@ struct OSDView: View {
         .onAppear {
             syncSearchWindows()
             updateSelection()
-            focusSearchIfNeeded()
         }
         .onChange(of: appState.osdMode) { _, mode in
             if mode == .windowSearch {
-                query = ""
                 syncSearchWindows()
-            } else {
-                query = ""
             }
 
             updateSelection()
-            focusSearchIfNeeded()
         }
-        .onChange(of: query) { _, _ in
+        .onChange(of: appState.windowSearchQuery) { _, _ in
             DispatchQueue.main.async {
                 updateSelection()
             }
@@ -163,14 +144,31 @@ struct OSDView: View {
             Image(systemName: "magnifyingglass")
                 .foregroundStyle(.secondary)
 
-            TextField("Search windows", text: $query)
-                .textFieldStyle(.plain)
-                .font(.callout)
-                .focused($queryFocused)
-                .allowsHitTesting(appState.osdMode == .windowSearch)
-                .onSubmit {
+            SearchTextField(
+                text: Binding(
+                    get: {
+                        appState.windowSearchQuery
+                    },
+                    set: { query in
+                        appState.setWindowSearchQuery(query)
+                    }
+                ),
+                isActive: appState.osdMode == .windowSearch,
+                placeholder: "Search windows",
+                onMoveUp: {
+                    moveSelection(by: -1)
+                },
+                onMoveDown: {
+                    moveSelection(by: 1)
+                },
+                onSubmit: {
                     focusSelectedWindow()
+                },
+                onEscape: {
+                    actions.closeSearch()
                 }
+            )
+            .frame(height: 20)
 
             Text("Space")
                 .font(.system(.caption, design: .monospaced).weight(.semibold))
@@ -205,15 +203,27 @@ struct OSDView: View {
             } else if filteredWindows.isEmpty {
                 emptySearchText(searchWindows.isEmpty ? "No readable windows." : "No matching windows.")
             } else {
-                ScrollView {
-                    VStack(alignment: .leading, spacing: 4) {
-                        ForEach(filteredWindows.prefix(18)) { window in
-                            Button {
-                                actions.focusWindow(window)
-                            } label: {
-                                windowRow(window, isSelected: window.id == selectedWindow?.id)
+                ScrollViewReader { proxy in
+                    ScrollView {
+                        VStack(alignment: .leading, spacing: 4) {
+                            ForEach(displayedWindows) { window in
+                                Button {
+                                    actions.focusWindow(window)
+                                } label: {
+                                    windowRow(window, isSelected: window.id == appState.selectedWindowID)
+                                }
+                                .buttonStyle(.plain)
+                                .id(window.id)
                             }
-                            .buttonStyle(.plain)
+                        }
+                    }
+                    .onChange(of: appState.selectedWindowID) { _, selectedWindowID in
+                        guard let selectedWindowID else {
+                            return
+                        }
+
+                        withAnimation(.easeOut(duration: 0.10)) {
+                            proxy.scrollTo(selectedWindowID, anchor: .center)
                         }
                     }
                 }
@@ -293,16 +303,16 @@ struct OSDView: View {
 
     private func updateSelection() {
         guard appState.osdMode == .windowSearch else {
-            selectedWindowID = nil
+            appState.selectWindow(id: nil)
             return
         }
 
-        if let selectedWindowID,
-           filteredWindows.contains(where: { $0.id == selectedWindowID }) {
+        if let selectedWindowID = appState.selectedWindowID,
+           displayedWindows.contains(where: { $0.id == selectedWindowID }) {
             return
         }
 
-        selectedWindowID = filteredWindows.first?.id
+        appState.selectWindow(id: displayedWindows.first?.id)
     }
 
     private func syncSearchWindows() {
@@ -313,22 +323,31 @@ struct OSDView: View {
         searchWindows = appState.windows
     }
 
-    private func focusSearchIfNeeded() {
-        guard appState.osdMode == .windowSearch else {
-            queryFocused = false
-            return
-        }
-
-        DispatchQueue.main.async {
-            queryFocused = true
-        }
-    }
-
     private func focusSelectedWindow() {
         guard let selectedWindow else {
             return
         }
 
         actions.focusWindow(selectedWindow)
+    }
+    private func moveSelection(by offset: Int) {
+        guard appState.osdMode == .windowSearch else {
+            return
+        }
+
+        guard !displayedWindows.isEmpty else {
+            appState.selectWindow(id: nil)
+            return
+        }
+
+        let currentIndex = appState.selectedWindowID.flatMap { selectedWindowID in
+            displayedWindows.firstIndex(where: { $0.id == selectedWindowID })
+        } ?? displayedWindows.startIndex
+
+        let nextIndex = max(
+            displayedWindows.startIndex,
+            min(displayedWindows.index(before: displayedWindows.endIndex), currentIndex + offset)
+        )
+        appState.selectWindow(id: displayedWindows[nextIndex].id)
     }
 }

@@ -87,6 +87,10 @@ final class RcmdApp: NSObject, NSApplicationDelegate {
             self?.handleRightCommandChanged(isHeld: isHeld)
         }
 
+        eventTapController.onWindowSearchKeyAction = { [weak self] action in
+            self?.handle(windowSearchKeyAction: action)
+        }
+
         refreshAccessibilityAndStartMonitorIfReady()
         refreshKeyMappingMode()
         refreshLaunchAtLogin()
@@ -171,6 +175,7 @@ final class RcmdApp: NSObject, NSApplicationDelegate {
                 return
             }
 
+            eventTapController.isWindowSearchActive = false
             osdWindowController?.hideImmediately()
 
             switch shortcut.kind {
@@ -240,10 +245,13 @@ final class RcmdApp: NSObject, NSApplicationDelegate {
     private func toggleWindowSearch() {
         if appState.osdMode == .windowSearch {
             appState.showAssignmentOSD()
+            eventTapController.isWindowSearchActive = false
             osdWindowController?.resignSearchIfNeeded()
         } else {
             appState.recordWindowSearchOpened()
             appState.showWindowSearchOSD()
+            eventTapController.isWindowSearchActive = true
+            updateWindowSearchSelection()
             osdWindowController?.activateSearchIfNeeded()
         }
     }
@@ -269,6 +277,7 @@ final class RcmdApp: NSObject, NSApplicationDelegate {
                 needsWindowRefresh = false
                 let windows = await windowRegistry.currentWindows()
                 appState.refreshWindows(windows)
+                updateWindowSearchSelection()
             } while needsWindowRefresh
 
             isWindowRefreshInFlight = false
@@ -318,6 +327,7 @@ final class RcmdApp: NSObject, NSApplicationDelegate {
         Task { @MainActor in
             osdWindowController?.hideImmediately()
             appState.showAssignmentOSD()
+            eventTapController.isWindowSearchActive = false
             let result = await windowRegistry.focus(window: window)
             appState.recordWindowSearchFocusResult(result)
             refreshWindows()
@@ -326,7 +336,82 @@ final class RcmdApp: NSObject, NSApplicationDelegate {
 
     func closeWindowSearch() {
         appState.showAssignmentOSD()
+        eventTapController.isWindowSearchActive = false
         osdWindowController?.hideImmediately()
+    }
+
+    private func handle(windowSearchKeyAction action: WindowSearchKeyAction) {
+        guard appState.osdMode == .windowSearch else {
+            return
+        }
+
+        switch action {
+        case .moveUp:
+            moveWindowSearchSelection(by: -1)
+        case .moveDown:
+            moveWindowSearchSelection(by: 1)
+        case .submit:
+            focusSelectedSearchWindow()
+        case .close:
+            closeWindowSearch()
+        case .deleteBackward:
+            appState.deleteWindowSearchBackward()
+            updateWindowSearchSelection()
+        case .insertText(let text):
+            appState.appendWindowSearchText(text)
+            updateWindowSearchSelection()
+        }
+    }
+
+    private var displayedWindowSearchWindows: [WindowInfo] {
+        WindowSearchFilter.displayedWindows(appState.windows, query: appState.windowSearchQuery)
+    }
+
+    private func selectedSearchWindow() -> WindowInfo? {
+        if let selectedWindowID = appState.selectedWindowID,
+           let window = displayedWindowSearchWindows.first(where: { $0.id == selectedWindowID }) {
+            return window
+        }
+
+        return displayedWindowSearchWindows.first
+    }
+
+    private func updateWindowSearchSelection() {
+        guard appState.osdMode == .windowSearch else {
+            return
+        }
+
+        if let selectedWindowID = appState.selectedWindowID,
+           displayedWindowSearchWindows.contains(where: { $0.id == selectedWindowID }) {
+            return
+        }
+
+        appState.selectWindow(id: displayedWindowSearchWindows.first?.id)
+    }
+
+    private func moveWindowSearchSelection(by offset: Int) {
+        guard !displayedWindowSearchWindows.isEmpty else {
+            appState.selectWindow(id: nil)
+            return
+        }
+
+        let currentIndex = appState.selectedWindowID.flatMap { selectedWindowID in
+            displayedWindowSearchWindows.firstIndex(where: { $0.id == selectedWindowID })
+        } ?? displayedWindowSearchWindows.startIndex
+
+        let nextIndex = max(
+            displayedWindowSearchWindows.startIndex,
+            min(displayedWindowSearchWindows.index(before: displayedWindowSearchWindows.endIndex), currentIndex + offset)
+        )
+        appState.selectWindow(id: displayedWindowSearchWindows[nextIndex].id)
+    }
+
+    private func focusSelectedSearchWindow() {
+        guard let window = selectedSearchWindow() else {
+            return
+        }
+
+        focus(window: window)
     }
 
     private func installWorkspaceObservers() {

@@ -18,6 +18,8 @@ final class AppStateModel: ObservableObject {
     @Published private(set) var launchAtLoginStatus = "Unknown"
     @Published private(set) var windows: [WindowInfo] = []
     @Published private(set) var osdMode: OSDMode = .assignments
+    @Published private(set) var windowSearchQuery = ""
+    @Published private(set) var selectedWindowID: WindowInfo.ID?
     @Published private(set) var lastShortcutMessage = "No shortcut handled yet."
 
     func refreshAccessibilityStatus() {
@@ -47,10 +49,34 @@ final class AppStateModel: ObservableObject {
 
     func showAssignmentOSD() {
         osdMode = .assignments
+        windowSearchQuery = ""
+        selectedWindowID = nil
     }
 
     func showWindowSearchOSD() {
         osdMode = .windowSearch
+        windowSearchQuery = ""
+        selectedWindowID = nil
+    }
+
+    func setWindowSearchQuery(_ query: String) {
+        windowSearchQuery = query
+    }
+
+    func appendWindowSearchText(_ text: String) {
+        windowSearchQuery += text
+    }
+
+    func deleteWindowSearchBackward() {
+        guard !windowSearchQuery.isEmpty else {
+            return
+        }
+
+        windowSearchQuery.removeLast()
+    }
+
+    func selectWindow(id: WindowInfo.ID?) {
+        selectedWindowID = id
     }
 
     func record(event: KeyEvent) {

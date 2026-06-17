@@ -22,6 +22,8 @@ final class EventTapController {
     var onEvent: (@MainActor (KeyEvent) -> Void)?
     var onShortcut: (@MainActor (KeyShortcut) -> Void)?
     var onRightCommandChanged: (@MainActor (Bool) -> Void)?
+    var onWindowSearchKeyAction: (@MainActor (WindowSearchKeyAction) -> Void)?
+    var isWindowSearchActive = false
     var keyMappingMode: KeyMappingMode = .activeLayout
 
     private var eventTap: CFMachPort?
@@ -143,6 +145,16 @@ final class EventTapController {
             return nil
         }
 
+        if keyEvent.kind == .keyDown, isWindowSearchActive {
+            if handleWindowSearchKeyDown(keyEvent, event: event) {
+                return nil
+            }
+
+            if rightCommandHeld {
+                return nil
+            }
+        }
+
         if keyEvent.kind == .keyDown,
            rightCommandHeld,
            event.getIntegerValueField(.keyboardEventAutorepeat) == 0,
@@ -175,6 +187,77 @@ final class EventTapController {
         }
 
         return Unmanaged.passUnretained(event)
+    }
+
+    private func handleWindowSearchKeyDown(_ keyEvent: KeyEvent, event: CGEvent) -> Bool {
+        if rightCommandHeld,
+           event.getIntegerValueField(.keyboardEventAutorepeat) == 0,
+           keyEvent.keyCode == KeyCode.space {
+            consumedKeyCodes.insert(keyEvent.keyCode)
+            emit(KeyShortcut(kind: .openWindowSearch, letter: " ", keyCode: keyEvent.keyCode, timestamp: Date()))
+            scheduleModifierStateReconciliation()
+            return true
+        }
+
+        switch keyEvent.keyCode {
+        case KeyCode.arrowUp:
+            emit(.moveUp)
+            return true
+        case KeyCode.arrowDown:
+            emit(.moveDown)
+            return true
+        case KeyCode.return, KeyCode.keypadEnter:
+            emit(.submit)
+            return true
+        case KeyCode.escape:
+            emit(.close)
+            return true
+        case KeyCode.delete:
+            emit(.deleteBackward)
+            return true
+        default:
+            break
+        }
+
+        if let text = printableText(from: event) {
+            emit(.insertText(text))
+            return true
+        }
+
+        if let letter = KeyboardLayout.letter(for: keyEvent.keyCode, mode: keyMappingMode) {
+            emit(.insertText(String(letter)))
+            return true
+        }
+
+        return false
+    }
+
+    private func printableText(from event: CGEvent) -> String? {
+        var actualLength = 0
+        var chars = [UniChar](repeating: 0, count: 8)
+        let textEvent = event.copy() ?? event
+        textEvent.flags.remove(.maskCommand)
+
+        textEvent.keyboardGetUnicodeString(
+            maxStringLength: chars.count,
+            actualStringLength: &actualLength,
+            unicodeString: &chars
+        )
+
+        guard actualLength > 0 else {
+            return nil
+        }
+
+        let scalars = chars.prefix(actualLength).compactMap(UnicodeScalar.init)
+        let text = String(String.UnicodeScalarView(scalars))
+
+        guard !text.isEmpty,
+              text.rangeOfCharacter(from: .controlCharacters) == nil,
+              text.rangeOfCharacter(from: .newlines) == nil else {
+            return nil
+        }
+
+        return text
     }
 
     private func reconcileModifierState(from event: KeyEvent) {
@@ -241,6 +324,16 @@ final class EventTapController {
 
         Task { @MainActor in
             onShortcut(shortcut)
+        }
+    }
+
+    private func emit(_ action: WindowSearchKeyAction) {
+        guard let onWindowSearchKeyAction else {
+            return
+        }
+
+        Task { @MainActor in
+            onWindowSearchKeyAction(action)
         }
     }
 

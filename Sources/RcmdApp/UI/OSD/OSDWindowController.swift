@@ -8,7 +8,7 @@ struct OSDActions {
 }
 
 @MainActor
-final class OSDWindowController {
+final class OSDWindowController: NSObject, NSWindowDelegate {
     private let appState: AppStateModel
     private let actions: OSDActions
     private var panel: NSPanel?
@@ -16,6 +16,7 @@ final class OSDWindowController {
     init(appState: AppStateModel, actions: OSDActions) {
         self.appState = appState
         self.actions = actions
+        super.init()
     }
 
     func show() {
@@ -127,8 +128,17 @@ final class OSDWindowController {
         panel.isReleasedWhenClosed = false
         panel.level = .statusBar
         panel.collectionBehavior = [.canJoinAllSpaces, .fullScreenAuxiliary, .ignoresCycle]
+        panel.delegate = self
 
         return panel
+    }
+
+    func windowDidResignKey(_ notification: Notification) {
+        guard appState.osdMode == .windowSearch else {
+            return
+        }
+
+        actions.closeSearch()
     }
 
     private func position(_ panel: NSPanel) {

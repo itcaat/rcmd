@@ -26,3 +26,12 @@ struct KeyShortcut: Sendable, Equatable {
         }
     }
 }
+
+enum WindowSearchKeyAction: Sendable, Equatable {
+    case moveUp
+    case moveDown
+    case submit
+    case close
+    case deleteBackward
+    case insertText(String)
+}
