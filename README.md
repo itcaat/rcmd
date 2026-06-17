@@ -1,145 +1,176 @@
 # rcmd
 
-Native macOS menu bar app inspired by rcmd.
+Native macOS keyboard switching for apps and windows.
 
-The project is currently in bootstrap/MVP development. The implemented app
-shell validates:
+`rcmd` is a menu bar utility inspired by the original rcmd idea: use the
+right-side Command key as a fast, low-friction switcher while leaving normal
+left Command shortcuts alone.
 
-- menu bar utility lifecycle;
-- Settings window;
-- Accessibility permission request/status;
-- active `CGEventTap`;
-- right/left Command key event logging;
-- dynamic assignments for running and installed apps;
-- `right cmd + letter` focusing or launching assigned apps;
-- `right cmd + tab` cycling readable windows;
-- `right cmd + space` searching readable windows by title or app inside the
-  OSD;
-- window search keyboard navigation, text input, Enter-to-focus,
-  Escape-to-close, Backspace, click selection, and smoothed selection/scroll
-  behavior;
-- manual assignments persisted in `~/.config/rcmd/config.yaml`;
-- polished OSD overlay with app icons while right Command is held;
-- layout-aware key translation for Latin keyboard layouts;
-- key mapping mode setting;
-- visual assignment editor with app icons in Settings;
-- Launch at Login setting;
-- read-only window diagnostics through Accessibility;
-- `.app` bundle packaging with Info.plist and app icon.
+> Status: MVP in active development. Local builds are ad-hoc signed and not
+> notarized yet.
 
-See [PROJECT_PLAN.md](PROJECT_PLAN.md) for the product plan and milestones.
-See [AGENTS.md](AGENTS.md) for instructions for future AI agents.
+![rcmd settings overview](docs/assets/readme-settings-overview.png)
 
-## Build
+## What Works
 
-```sh
-swift build
-```
+- Hold **Right Command** to show app assignments in a polished OSD.
+- Press **Right Command + letter** to focus a running app or launch a closed
+  app.
+- Press **Right Command + Space** to search open windows by title or app.
+- Use **Up/Down**, **Enter**, **Escape**, **Backspace**, and mouse clicks in
+  window search.
+- Press **Right Command + Tab** to focus the next readable window.
+- Create manual assignments with **Right Command + Right Option + letter**.
+- Edit assignments, key mapping, Launch at Login, and diagnostics in Settings.
+- Persist config in readable YAML at `~/.config/rcmd/config.yaml`.
+- Package the app as a local DMG with an `Applications` shortcut.
 
-The repository also provides Make targets used by CI:
+## Screenshots
 
-```sh
-make ci
-make package VERSION=0.1.0
-```
+### App OSD
 
-`make ci` builds the SwiftPM package, runs tests when a `Tests/` directory is
-available, and verifies app bundle packaging. The current project state has no
-tests, so the test step is skipped locally and in CI until tests are added.
+![rcmd app OSD](docs/assets/readme-app-osd.png)
 
-## Run
+### Window Search
 
-```sh
-swift run rcmd-app
-```
+![rcmd window search](docs/assets/readme-window-search.png)
 
-For app-style manual testing, build a local DMG and open the bundled app:
+### Settings
+
+![rcmd settings](docs/assets/readme-settings-overview.png)
+
+## Install For Local Testing
+
+Build the DMG:
 
 ```sh
 make package
+```
+
+Open it:
+
+```sh
 open dist/rcmd-local-macos.dmg
 ```
 
-The DMG contains `rcmd.app` and an `Applications` shortcut. Drag the app onto
-the shortcut to install it.
+Drag `rcmd.app` to `Applications`, then launch it normally.
 
-The app launches as a menu bar utility with a keyboard icon and `rcmd` text in
-the top-right macOS menu bar. If Accessibility permission is missing, the
-Settings window should also open automatically. Click `Request Permission`,
-then grant the app in macOS System Settings. The keyboard monitor starts
-automatically after permission is granted.
+The current DMG is ad-hoc signed for local testing. On another Mac, Gatekeeper
+may warn that the app is from an unidentified developer. A smoother public
+install flow needs Developer ID signing, notarization, and stapling.
 
-After permission is granted, hold right Command to show the OSD assignment
-overlay. Press one of the listed letters to focus a running app or launch a
-closed app. The OSD is scrollable for larger assignment lists and appears on
-the screen containing the pointer. OSD and Settings assignment rows show app
-icons when the app bundle can be resolved.
+## First Run
 
-Press `right cmd + tab` to focus the next readable window. This first window
-cycling implementation uses Accessibility metadata and does not yet provide a
-dedicated window switcher UI.
+`rcmd` needs macOS Accessibility permission to read global keyboard events and
+focus windows.
 
-While the OSD is visible, press `Space` to switch the OSD into window search.
-The assignment hints collapse, the search field in the OSD footer becomes
-active, and you can type part of an app name or window title. Use Up/Down to
-move through results, Backspace to edit the query, Enter or click to focus a
-window, and Escape to close search. The search mode preserves system language
-switching shortcuts such as Control/Option-based input source changes.
+1. Launch `rcmd.app`.
+2. Open the menu bar item or Settings window.
+3. Grant Accessibility permission when prompted.
+4. The keyboard monitor starts automatically after permission is granted.
 
-Key mapping mode is configurable in Settings:
+If the permission state looks stale, quit and relaunch the app after granting
+the permission.
 
-- `Physical keys` uses QWERTY letter positions regardless of active keyboard
+## Shortcuts
+
+| Shortcut | Action |
+| --- | --- |
+| `Right Command` | Show app assignment OSD |
+| `Right Command + letter` | Focus or launch assigned app |
+| `Right Command + Space` | Toggle window search |
+| `Up / Down` in search | Move selected window |
+| `Enter` in search | Focus selected window |
+| `Escape` in search | Close search |
+| `Right Command + Tab` | Focus next readable window |
+| `Right Command + Right Option + letter` | Assign frontmost app |
+
+## Settings
+
+The Settings window is split into focused panes:
+
+- **Overview**: Accessibility, keyboard monitor, Launch at Login, app/window
+  counts.
+- **Shortcuts**: active shortcuts and key mapping mode.
+- **Assignments**: manual assignment editor and current dynamic assignments.
+- **Windows**: readable Accessibility window metadata.
+- **Diagnostics**: status messages and recent key events.
+
+Key mapping modes:
+
+- **Physical keys** uses QWERTY letter positions regardless of active keyboard
   layout.
-- `Active layout` uses the active Latin macOS keyboard layout, with physical
+- **Active layout** uses the active Latin macOS keyboard layout, with physical
   QWERTY fallback for non-Latin layouts.
 
-Launch at Login is configurable in Settings and is intended for the packaged
-`.app` build. It may not work correctly from `swift run`.
+## Config
 
-To set a manual assignment, focus the target app and press
-`right cmd + right option + letter`. Manual assignments take priority over
-dynamic assignments and are saved to:
+Manual assignments and key mapping mode are saved to:
 
 ```text
 ~/.config/rcmd/config.yaml
 ```
 
-Manual assignments can also be edited in Settings: choose a letter, choose an
-installed app, click `Assign`, or remove an existing manual assignment.
-
-Settings also includes a `Windows` diagnostics section. It reads current
-window metadata through Accessibility and shows app, title, minimized/focused
-state, and bounds. This is the foundation for future Cmd-Tab/window switching.
-
-The config currently stores:
+Example:
 
 ```yaml
 keyMappingMode: activeLayout
 assignments:
   c: com.google.Chrome
+  f: com.apple.finder
 ```
 
-If the menu bar item is not visible, check whether the process is still running:
+## Development
+
+Build:
 
 ```sh
-pgrep -fl rcmd-app
+swift build
 ```
+
+Run from SwiftPM:
+
+```sh
+swift run rcmd-app
+```
+
+Run CI-style local checks:
+
+```sh
+make ci
+```
+
+Package:
+
+```sh
+make package VERSION=0.1.0
+```
+
+`make ci` builds the SwiftPM package, runs tests when a `Tests/` directory is
+available, and verifies app bundle packaging. The current project state has no
+tests, so the test step is skipped until tests are added.
 
 ## Logs
 
-Keyboard bootstrap logs use the `dev.local.rcmd` subsystem:
+Keyboard and app logs use the `dev.local.rcmd` subsystem:
 
 ```sh
 log stream --level debug --style compact --predicate 'subsystem == "dev.local.rcmd"'
 ```
 
+If the menu bar item is not visible, check whether the process is running:
+
+```sh
+pgrep -fl rcmd-app
+```
+
 ## Release
 
-Every branch push and pull request runs the GitHub Actions CI workflow. Pushing
-a semantic version tag like `v0.1.0` runs the release workflow, builds the app,
-packages `rcmd.app` into a DMG, and publishes a GitHub Release.
+Every branch push and pull request runs GitHub Actions CI. Pushing a semantic
+version tag like `v0.1.0` runs the release workflow, builds the app, packages
+`rcmd.app` into a DMG, and publishes a GitHub Release.
 
-Create the next patch tag locally, then push the tag printed by the command:
+Create the next patch tag locally:
 
 ```sh
 make release
@@ -154,16 +185,27 @@ make release VERSION=0.2.0
 make release-push
 ```
 
-`make release-push` creates the next patch tag and pushes it to `origin`,
-triggering the release workflow. The published DMG is not notarized yet; the
-app bundle is ad-hoc signed for local integrity only.
+Public distribution still needs:
+
+- Developer ID Application signing;
+- hardened runtime;
+- Apple notarization;
+- stapling the notarization ticket to the DMG.
 
 ## Current Limitations
 
-- YAML support is intentionally minimal and currently stores key mapping mode
-  and assignments.
-- No tests yet; the currently selected CommandLineTools install does not expose
-  `XCTest` or Swift `Testing`, so `swift test` reports no tests.
-- Window cycling and search are basic and do not yet provide MRU ordering,
-  ranked fuzzy search, or close/quit/hide result actions.
 - Release artifacts are not Developer ID signed or notarized yet.
+- Window cycling and search do not yet provide MRU ordering or ranked fuzzy
+  search.
+- Window search does not yet expose close, quit, or hide actions.
+- YAML support is intentionally minimal.
+- No tests yet; the selected Command Line Tools install does not expose
+  `XCTest` or Swift `Testing` for this package.
+
+## Project Notes
+
+- [PROJECT_PLAN.md](PROJECT_PLAN.md) is the source of truth for roadmap,
+  milestones, and current priorities.
+- [AGENTS.md](AGENTS.md) contains workflow instructions for future AI agents.
+
+This project is inspired by rcmd, but it is an independent implementation.
