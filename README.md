@@ -9,7 +9,7 @@ left Command shortcuts alone.
 > Status: MVP in active development. Local builds are ad-hoc signed and not
 > notarized yet.
 
-![rcmd settings overview](docs/assets/readme-settings-overview.png)
+![rcmd app OSD](docs/assets/readme-app-osd.png)
 
 ## What Works
 
@@ -27,15 +27,11 @@ left Command shortcuts alone.
 
 ## Screenshots
 
-### App OSD
-
-![rcmd app OSD](docs/assets/readme-app-osd.png)
-
 ### Window Search
 
 ![rcmd window search](docs/assets/readme-window-search.png)
 
-### Settings
+### Settings Overview
 
 ![rcmd settings](docs/assets/readme-settings-overview.png)
 
