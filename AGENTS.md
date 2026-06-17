@@ -15,7 +15,9 @@ what should happen next.
 
 ## Current State
 
-The project is at the bootstrap stage.
+The project is in MVP/window-foundation development. The bootstrap shell and
+core app-switching loop are implemented; current work is focused on making
+window search/cycling feel fast, predictable, and native.
 
 Implemented:
 
@@ -37,28 +39,37 @@ Implemented:
 - Launch at Login setting through `SMAppService`;
 - read-only window diagnostics through Accessibility API;
 - minimal `right cmd + tab` window cycling through Accessibility API;
-- minimal `right cmd + space` window search by app name/title;
+- OSD-integrated `right cmd + space` window search by app name/title;
+- window search typing, Backspace, Escape, Enter-to-focus, click selection,
+  and Up/Down navigation;
+- stable OSD footer search input with smoothed selection and edge scrolling;
+- event-tap-driven window search input that preserves system language-switching
+  shortcuts;
 - `.app` bundle packaging with Info.plist, generated AppIcon.icns, DMG output,
   and ad-hoc signing.
 
 Not implemented:
 
 - Xcode project;
-- MRU window cycling and dedicated window switcher UI;
+- MRU window cycling, ranked fuzzy search, and dedicated window switcher UI;
+- close/quit/hide actions from window search results;
 - no tests;
 - no Developer ID signing or notarization pipeline.
 
 ## Immediate Priority
 
-Start with MVP v0.1 from `PROJECT_PLAN.md`.
+Continue MVP v0.1 from `PROJECT_PLAN.md`.
 
-The next practical task is to complete the first MVP app-switching loop:
+The next practical tasks are:
 
-1. improve config parsing if broader YAML settings are added;
-2. add tests once a usable XCTest/Swift Testing toolchain is available;
+1. improve window search ranking so exact title/app matches and recently active
+   windows appear first;
+2. add MRU tracking for windows and use it in `right cmd + tab` and search;
 3. continue window foundation by adding AX observers or a lightweight refresh
    strategy for window title/focus/order updates;
-4. add Developer ID signing/notarization when distribution becomes necessary.
+4. improve config parsing if broader YAML settings are added;
+5. add tests once a usable XCTest/Swift Testing toolchain is available;
+6. add Developer ID signing/notarization when distribution becomes necessary.
 
 Do not start with Spaces, Stages, licensing, or Cmd-Tab replacement. Those are
 later milestones and depend on the app/window foundation.

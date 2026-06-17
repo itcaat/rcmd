@@ -1,15 +1,15 @@
 # rcmd-like macOS App Project Plan
 
-Last updated: 2026-06-16
+Last updated: 2026-06-17
 
 ## Purpose
 
 Build a native macOS application inspired by rcmd: fast keyboard-driven app,
 window, and workspace switching using the right-side modifier keys.
 
-This repository is currently at the bootstrap stage. A minimal SwiftPM macOS
-menu bar app shell exists, and the first app-switching behavior can focus or
-launch assigned apps.
+This repository is in MVP/window-foundation development. The core native
+menu bar shell, app switching loop, OSD, packaging, and basic window search
+are implemented for local testing.
 
 ## Current Repository State
 
@@ -44,7 +44,14 @@ Done:
 - Read-only window diagnostics exist through Accessibility API and are shown in
   Settings.
 - Minimal `right cmd + tab` window cycling exists through Accessibility API.
-- `right cmd + space` opens a minimal window search by app name or title.
+- `right cmd + space` toggles an OSD-integrated window search by app name or
+  title.
+- Window search supports direct typing, Backspace, Escape, Enter-to-focus,
+  mouse selection, and Up/Down keyboard navigation.
+- Window search keeps the search input embedded in the stable OSD footer and
+  uses smoothed selection and edge scrolling.
+- Window search input is handled through the event tap while preserving system
+  language-switching shortcuts.
 - GitHub Actions CI exists for branch pushes and pull requests.
 - Tag-driven GitHub Actions release publishing exists for `v*.*.*` tags.
 - Local `make` targets exist for CI, DMG packaging, and release tag creation.
@@ -57,7 +64,9 @@ Not done:
 - YAML support is minimal and currently stores key mapping mode and assignments.
 - No tests exist yet; current CommandLineTools install does not expose `XCTest`
   or Swift `Testing`.
-- Window cycling and search are minimal and do not yet provide MRU ordering.
+- Window cycling and search are basic and do not yet provide MRU ordering or
+  ranked fuzzy search.
+- Window search does not yet expose close/quit/hide actions.
 - No Developer ID signing, notarization, or installer pipeline exists yet.
 
 ## Product Target
@@ -269,7 +278,9 @@ Tasks:
 - Focus the next readable window with `right cmd + tab`. Minimal implementation
   exists.
 - Search readable windows by app name or title with `right cmd + space`.
-  Minimal implementation exists.
+  Basic OSD-integrated implementation exists with text input, keyboard
+  navigation, click selection, Enter-to-focus, Escape-to-close, and smoothed
+  selection/edge-scroll behavior.
 - Add AX observers where practical.
 - Keep blocking Accessibility calls off the main thread. Done for snapshot
   reads; refreshes are coalesced to avoid overlapping AX scans.
@@ -297,7 +308,8 @@ Acceptance criteria:
 
 - Fast tap switches immediately.
 - Holding modifier shows OSD.
-- Typing filters windows by app name or title.
+- Typing filters windows by app name or title. Basic support exists in
+  `right cmd + space`; Cmd-Tab-style integrated filtering is not done.
 
 ### Milestone 6: Search
 
@@ -306,7 +318,8 @@ Goal: add fuzzy search across apps and windows.
 Tasks:
 
 - Implement ranked fuzzy matcher.
-- Search installed apps, running apps, and open windows.
+- Search installed apps, running apps, and open windows. Open-window filtering
+  exists; app search and ranked fuzzy search are not done.
 - Remember selected result per query.
 - Add close/quit/hide actions for hovered results.
 
@@ -412,11 +425,15 @@ When continuing this project:
 
 Recommended next action:
 
-1. Continue Milestone 4 by adding AX observers or a lightweight refresh
+1. Improve window search ranking: exact title/app matches first, focused or
+   recently active windows higher, weaker substring matches lower.
+2. Add MRU tracking for windows so `right cmd + tab` and window search feel
+   predictable.
+3. Continue Milestone 4 by adding AX observers or a lightweight refresh
    strategy for window title/focus/order updates.
-2. Broaden config parsing if more YAML settings are introduced.
-3. Add tests once a usable XCTest/Swift Testing toolchain is available.
-4. Add Developer ID signing/notarization when distribution becomes necessary.
+4. Broaden config parsing if more YAML settings are introduced.
+5. Add tests once a usable XCTest/Swift Testing toolchain is available.
+6. Add Developer ID signing/notarization when distribution becomes necessary.
 
 ## Definition of Done for MVP v0.1
 
@@ -430,3 +447,5 @@ MVP v0.1 is done when:
 - Manual assignments persist across restart.
 - Config is saved as YAML.
 - README explains how to build and run locally.
+- Local DMG packaging produces an installable `rcmd.app` with an
+  `Applications` shortcut.

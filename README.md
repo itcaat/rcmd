@@ -13,7 +13,11 @@ shell validates:
 - dynamic assignments for running and installed apps;
 - `right cmd + letter` focusing or launching assigned apps;
 - `right cmd + tab` cycling readable windows;
-- `right cmd + space` searching readable windows by title or app;
+- `right cmd + space` searching readable windows by title or app inside the
+  OSD;
+- window search keyboard navigation, text input, Enter-to-focus,
+  Escape-to-close, Backspace, click selection, and smoothed selection/scroll
+  behavior;
 - manual assignments persisted in `~/.config/rcmd/config.yaml`;
 - polished OSD overlay with app icons while right Command is held;
 - layout-aware key translation for Latin keyboard layouts;
@@ -76,9 +80,11 @@ cycling implementation uses Accessibility metadata and does not yet provide a
 dedicated window switcher UI.
 
 While the OSD is visible, press `Space` to switch the OSD into window search.
-The assignment hints collapse, the search field expands, and you can type part
-of an app name or window title. Press Enter or click a result to focus that
-window.
+The assignment hints collapse, the search field in the OSD footer becomes
+active, and you can type part of an app name or window title. Use Up/Down to
+move through results, Backspace to edit the query, Enter or click to focus a
+window, and Escape to close search. The search mode preserves system language
+switching shortcuts such as Control/Option-based input source changes.
 
 Key mapping mode is configurable in Settings:
 
@@ -103,8 +109,7 @@ installed app, click `Assign`, or remove an existing manual assignment.
 
 Settings also includes a `Windows` diagnostics section. It reads current
 window metadata through Accessibility and shows app, title, minimized/focused
-state, and bounds. This is the foundation for future Cmd-Tab/window switching;
-it does not focus individual windows yet.
+state, and bounds. This is the foundation for future Cmd-Tab/window switching.
 
 The config currently stores:
 
@@ -159,5 +164,6 @@ app bundle is ad-hoc signed for local integrity only.
   and assignments.
 - No tests yet; the currently selected CommandLineTools install does not expose
   `XCTest` or Swift `Testing`, so `swift test` reports no tests.
-- Window cycling and search are minimal and do not yet provide MRU ordering.
+- Window cycling and search are basic and do not yet provide MRU ordering,
+  ranked fuzzy search, or close/quit/hide result actions.
 - Release artifacts are not Developer ID signed or notarized yet.
