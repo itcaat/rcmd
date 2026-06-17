@@ -43,3 +43,20 @@ struct WindowInfo: Identifiable, Equatable, Sendable {
         return parts.joined(separator: ", ")
     }
 }
+
+enum WindowFocusResult: Sendable, Equatable {
+    case focused(WindowInfo)
+    case noWindows
+    case failed(String)
+
+    var displayMessage: String {
+        switch self {
+        case .focused(let window):
+            "Focused \(window.appName): \(window.displayTitle)."
+        case .noWindows:
+            "No readable windows found."
+        case .failed(let message):
+            "Window focus failed: \(message)"
+        }
+    }
+}

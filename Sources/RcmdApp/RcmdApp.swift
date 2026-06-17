@@ -13,6 +13,7 @@ final class RcmdApp: NSObject, NSApplicationDelegate {
     private var settingsWindowController: SettingsWindowController?
     private var osdWindowController: OSDWindowController?
     private var permissionTimer: Timer?
+    private var pendingOSDShowWorkItem: DispatchWorkItem?
     private var isWindowRefreshInFlight = false
     private var needsWindowRefresh = false
     private var workspaceObservers: [NSObjectProtocol] = []
@@ -45,7 +46,20 @@ final class RcmdApp: NSObject, NSApplicationDelegate {
                 }
             )
         )
-        osdWindowController = OSDWindowController(appState: appState)
+        osdWindowController = OSDWindowController(
+            appState: appState,
+            actions: OSDActions(
+                focusWindow: { [weak self] window in
+                    self?.focus(window: window)
+                },
+                refreshWindows: { [weak self] in
+                    self?.refreshWindows()
+                },
+                closeSearch: { [weak self] in
+                    self?.closeWindowSearch()
+                }
+            )
+        )
         menuBarController = MenuBarController(
             appState: appState,
             actions: MenuBarActions(
@@ -141,6 +155,7 @@ final class RcmdApp: NSObject, NSApplicationDelegate {
 
     private func stopEventTap() {
         eventTapController.stop()
+        cancelPendingOSDShow()
         osdWindowController?.hide()
         appState.eventTapRunning = false
         appState.statusMessage = "Keyboard monitor is stopped."
@@ -149,8 +164,14 @@ final class RcmdApp: NSObject, NSApplicationDelegate {
 
     private func handle(shortcut: KeyShortcut) {
         Task { @MainActor in
-            refreshAssignments()
-            refreshWindows()
+            cancelPendingOSDShow()
+
+            if shortcut.kind == .openWindowSearch {
+                toggleWindowSearch()
+                return
+            }
+
+            osdWindowController?.hideImmediately()
 
             switch shortcut.kind {
             case .activate:
@@ -159,23 +180,71 @@ final class RcmdApp: NSObject, NSApplicationDelegate {
             case .assign:
                 let result = appRegistry.assignFrontmostApp(to: shortcut.letter)
                 appState.record(shortcut: shortcut, assignmentResult: result)
+            case .cycleWindow:
+                let result = await windowRegistry.focusNextWindow()
+                appState.record(shortcut: shortcut, windowFocusResult: result)
+            case .openWindowSearch:
+                break
             }
 
             refreshAssignments()
             refreshAppCatalog()
             refreshWindows()
             menuBarController?.refresh()
-            osdWindowController?.hide()
         }
     }
 
     private func handleRightCommandChanged(isHeld: Bool) {
         if isHeld {
-            refreshAssignments()
-            refreshWindows()
-            osdWindowController?.show()
+            if appState.osdMode == .windowSearch {
+                cancelPendingOSDShow()
+                osdWindowController?.focusSearch()
+            } else {
+                scheduleAssignmentOSDShow()
+            }
+        } else if appState.osdMode == .windowSearch {
+            cancelPendingOSDShow()
+            osdWindowController?.focusSearch()
         } else {
+            cancelPendingOSDShow()
             osdWindowController?.hide()
+        }
+    }
+
+    private func scheduleAssignmentOSDShow() {
+        cancelPendingOSDShow()
+
+        let workItem = DispatchWorkItem { [weak self] in
+            Task { @MainActor in
+                guard let self else {
+                    return
+                }
+
+                self.refreshAssignments()
+                self.refreshWindows()
+                self.appState.showAssignmentOSD()
+                self.osdWindowController?.show()
+                self.pendingOSDShowWorkItem = nil
+            }
+        }
+
+        pendingOSDShowWorkItem = workItem
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.12, execute: workItem)
+    }
+
+    private func cancelPendingOSDShow() {
+        pendingOSDShowWorkItem?.cancel()
+        pendingOSDShowWorkItem = nil
+    }
+
+    private func toggleWindowSearch() {
+        if appState.osdMode == .windowSearch {
+            appState.showAssignmentOSD()
+            osdWindowController?.resignSearchIfNeeded()
+        } else {
+            appState.recordWindowSearchOpened()
+            appState.showWindowSearchOSD()
+            osdWindowController?.activateSearchIfNeeded()
         }
     }
 
@@ -243,6 +312,21 @@ final class RcmdApp: NSObject, NSApplicationDelegate {
         refreshLaunchAtLogin()
         appState.recordLaunchAtLoginResult(result)
         menuBarController?.refresh()
+    }
+
+    func focus(window: WindowInfo) {
+        Task { @MainActor in
+            osdWindowController?.hideImmediately()
+            appState.showAssignmentOSD()
+            let result = await windowRegistry.focus(window: window)
+            appState.recordWindowSearchFocusResult(result)
+            refreshWindows()
+        }
+    }
+
+    func closeWindowSearch() {
+        appState.showAssignmentOSD()
+        osdWindowController?.hideImmediately()
     }
 
     private func installWorkspaceObservers() {

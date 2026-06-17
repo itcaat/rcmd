@@ -2,15 +2,110 @@ import SwiftUI
 
 struct OSDView: View {
     @ObservedObject var appState: AppStateModel
+    let actions: OSDActions
+
+    @State private var query = ""
+    @State private var selectedWindowID: WindowInfo.ID?
+    @State private var searchWindows: [WindowInfo] = []
+    @FocusState private var queryFocused: Bool
 
     private let columns = [
         GridItem(.adaptive(minimum: 178), spacing: 8)
     ]
+    private let contentHeight: CGFloat = 340
+
+    private var filteredWindows: [WindowInfo] {
+        let normalizedQuery = query.trimmingCharacters(in: .whitespacesAndNewlines)
+        let tokens = normalizedQuery
+            .lowercased()
+            .split(separator: " ")
+            .map(String.init)
+
+        guard !tokens.isEmpty else {
+            return searchWindows
+        }
+
+        return searchWindows.filter { window in
+            let searchableText = "\(window.appName) \(window.displayTitle) \(window.bundleIdentifier)"
+                .lowercased()
+
+            return tokens.allSatisfy { searchableText.contains($0) }
+        }
+    }
+
+    private var selectedWindow: WindowInfo? {
+        if let selectedWindowID,
+           let selectedWindow = filteredWindows.first(where: { $0.id == selectedWindowID }) {
+            return selectedWindow
+        }
+
+        return filteredWindows.first
+    }
 
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
             header
 
+            contentArea
+
+            bottomSearchBar
+        }
+        .padding(16)
+        .frame(minWidth: 420, idealWidth: 620, maxWidth: 720)
+        .frame(height: 430)
+        .background(.regularMaterial)
+        .clipShape(RoundedRectangle(cornerRadius: 8, style: .continuous))
+        .overlay {
+            RoundedRectangle(cornerRadius: 8, style: .continuous)
+                .stroke(Color.primary.opacity(0.12), lineWidth: 1)
+        }
+        .shadow(color: Color.black.opacity(0.26), radius: 20, x: 0, y: 12)
+        .onAppear {
+            syncSearchWindows()
+            updateSelection()
+            focusSearchIfNeeded()
+        }
+        .onChange(of: appState.osdMode) { _, mode in
+            if mode == .windowSearch {
+                query = ""
+                syncSearchWindows()
+            } else {
+                query = ""
+            }
+
+            updateSelection()
+            focusSearchIfNeeded()
+        }
+        .onChange(of: query) { _, _ in
+            DispatchQueue.main.async {
+                updateSelection()
+            }
+        }
+        .onChange(of: appState.windows) { _, _ in
+            syncSearchWindows()
+            updateSelection()
+        }
+        .onExitCommand {
+            if appState.osdMode == .windowSearch {
+                actions.closeSearch()
+            }
+        }
+    }
+
+    private var contentArea: some View {
+        ZStack(alignment: .topLeading) {
+            if appState.osdMode == .assignments {
+                assignmentContent
+            } else {
+                searchResults
+            }
+        }
+        .frame(maxWidth: .infinity, alignment: .topLeading)
+        .frame(height: contentHeight)
+    }
+
+    private var assignmentContent: some View {
+        VStack(alignment: .leading, spacing: 12) {
             if appState.assignments.isEmpty {
                 Text("No app assignments")
                     .font(.callout)
@@ -26,7 +121,7 @@ struct OSDView: View {
                     }
                     .padding(.trailing, 2)
                 }
-                .frame(maxHeight: 460)
+                .frame(height: contentHeight)
                 .scrollIndicators(.hidden)
 
                 if appState.assignments.count > 48 {
@@ -36,15 +131,6 @@ struct OSDView: View {
                 }
             }
         }
-        .padding(16)
-        .frame(minWidth: 420, idealWidth: 620, maxWidth: 720)
-        .background(.regularMaterial)
-        .clipShape(RoundedRectangle(cornerRadius: 8, style: .continuous))
-        .overlay {
-            RoundedRectangle(cornerRadius: 8, style: .continuous)
-                .stroke(Color.primary.opacity(0.12), lineWidth: 1)
-        }
-        .shadow(color: Color.black.opacity(0.26), radius: 20, x: 0, y: 12)
     }
 
     private var header: some View {
@@ -57,10 +143,115 @@ struct OSDView: View {
 
                 Spacer(minLength: 0)
 
-                Text("\(appState.assignments.count) apps")
+                Text(headerCountText)
                     .font(.caption)
                     .foregroundStyle(.secondary)
         }
+    }
+
+    private var headerCountText: String {
+        switch appState.osdMode {
+        case .assignments:
+            "\(appState.assignments.count) apps"
+        case .windowSearch:
+            "\(searchWindows.count) windows"
+        }
+    }
+
+    private var bottomSearchBar: some View {
+        HStack(spacing: 10) {
+            Image(systemName: "magnifyingglass")
+                .foregroundStyle(.secondary)
+
+            TextField("Search windows", text: $query)
+                .textFieldStyle(.plain)
+                .font(.callout)
+                .focused($queryFocused)
+                .allowsHitTesting(appState.osdMode == .windowSearch)
+                .onSubmit {
+                    focusSelectedWindow()
+                }
+
+            Text("Space")
+                .font(.system(.caption, design: .monospaced).weight(.semibold))
+                .foregroundStyle(.secondary)
+                .padding(.horizontal, 7)
+                .padding(.vertical, 4)
+                .background(Color.secondary.opacity(0.14))
+                .clipShape(RoundedRectangle(cornerRadius: 5, style: .continuous))
+
+            if appState.osdMode == .assignments {
+                Text("\(appState.windows.count)")
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+                    .frame(minWidth: 22, alignment: .trailing)
+            } else {
+                Text("\(filteredWindows.count)")
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+                    .frame(minWidth: 22, alignment: .trailing)
+            }
+        }
+        .padding(.horizontal, 12)
+        .frame(height: 36)
+        .background(Color.secondary.opacity(0.10))
+        .clipShape(RoundedRectangle(cornerRadius: 8, style: .continuous))
+    }
+
+    private var searchResults: some View {
+        ZStack(alignment: .topLeading) {
+            if !appState.accessibilityTrusted {
+                emptySearchText("Grant Accessibility to search windows.")
+            } else if filteredWindows.isEmpty {
+                emptySearchText(searchWindows.isEmpty ? "No readable windows." : "No matching windows.")
+            } else {
+                ScrollView {
+                    VStack(alignment: .leading, spacing: 4) {
+                        ForEach(filteredWindows.prefix(18)) { window in
+                            Button {
+                                actions.focusWindow(window)
+                            } label: {
+                                windowRow(window, isSelected: window.id == selectedWindow?.id)
+                            }
+                            .buttonStyle(.plain)
+                        }
+                    }
+                }
+                .scrollIndicators(.hidden)
+            }
+        }
+        .frame(height: contentHeight)
+    }
+
+    private func emptySearchText(_ text: String) -> some View {
+        Text(text)
+            .foregroundStyle(.secondary)
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .padding(.vertical, 10)
+    }
+
+    private func windowRow(_ window: WindowInfo, isSelected: Bool) -> some View {
+        HStack(spacing: 10) {
+            AppIconView(appURL: window.appURL, size: 26)
+
+            VStack(alignment: .leading, spacing: 2) {
+                Text(window.displayTitle)
+                    .font(.callout)
+                    .lineLimit(1)
+
+                Text("\(window.appName) - \(window.detailText)")
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+                    .lineLimit(1)
+            }
+
+            Spacer(minLength: 0)
+        }
+        .padding(.horizontal, 10)
+        .frame(height: 44)
+        .background(isSelected ? Color.accentColor.opacity(0.16) : Color.clear)
+        .clipShape(RoundedRectangle(cornerRadius: 7, style: .continuous))
+        .contentShape(Rectangle())
     }
 
     private func assignmentRow(_ assignment: AppAssignment) -> some View {
@@ -98,5 +289,46 @@ struct OSDView: View {
         }
 
         return state
+    }
+
+    private func updateSelection() {
+        guard appState.osdMode == .windowSearch else {
+            selectedWindowID = nil
+            return
+        }
+
+        if let selectedWindowID,
+           filteredWindows.contains(where: { $0.id == selectedWindowID }) {
+            return
+        }
+
+        selectedWindowID = filteredWindows.first?.id
+    }
+
+    private func syncSearchWindows() {
+        guard appState.osdMode == .windowSearch else {
+            return
+        }
+
+        searchWindows = appState.windows
+    }
+
+    private func focusSearchIfNeeded() {
+        guard appState.osdMode == .windowSearch else {
+            queryFocused = false
+            return
+        }
+
+        DispatchQueue.main.async {
+            queryFocused = true
+        }
+    }
+
+    private func focusSelectedWindow() {
+        guard let selectedWindow else {
+            return
+        }
+
+        actions.focusWindow(selectedWindow)
     }
 }

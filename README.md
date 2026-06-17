@@ -12,6 +12,8 @@ shell validates:
 - right/left Command key event logging;
 - dynamic assignments for running and installed apps;
 - `right cmd + letter` focusing or launching assigned apps;
+- `right cmd + tab` cycling readable windows;
+- `right cmd + space` searching readable windows by title or app;
 - manual assignments persisted in `~/.config/rcmd/config.yaml`;
 - polished OSD overlay with app icons while right Command is held;
 - layout-aware key translation for Latin keyboard layouts;
@@ -68,6 +70,15 @@ overlay. Press one of the listed letters to focus a running app or launch a
 closed app. The OSD is scrollable for larger assignment lists and appears on
 the screen containing the pointer. OSD and Settings assignment rows show app
 icons when the app bundle can be resolved.
+
+Press `right cmd + tab` to focus the next readable window. This first window
+cycling implementation uses Accessibility metadata and does not yet provide a
+dedicated window switcher UI.
+
+While the OSD is visible, press `Space` to switch the OSD into window search.
+The assignment hints collapse, the search field expands, and you can type part
+of an app name or window title. Press Enter or click a result to focus that
+window.
 
 Key mapping mode is configurable in Settings:
 
@@ -148,6 +159,5 @@ app bundle is ad-hoc signed for local integrity only.
   and assignments.
 - No tests yet; the currently selected CommandLineTools install does not expose
   `XCTest` or Swift `Testing`, so `swift test` reports no tests.
-- Window support is read-only diagnostics for now; window cycling/focusing is
-  not implemented yet.
+- Window cycling and search are minimal and do not yet provide MRU ordering.
 - Release artifacts are not Developer ID signed or notarized yet.

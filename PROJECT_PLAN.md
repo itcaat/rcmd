@@ -43,6 +43,8 @@ Done:
 - Launch at Login setting exists through `SMAppService`.
 - Read-only window diagnostics exist through Accessibility API and are shown in
   Settings.
+- Minimal `right cmd + tab` window cycling exists through Accessibility API.
+- `right cmd + space` opens a minimal window search by app name or title.
 - GitHub Actions CI exists for branch pushes and pull requests.
 - Tag-driven GitHub Actions release publishing exists for `v*.*.*` tags.
 - Local `make` targets exist for CI, DMG packaging, and release tag creation.
@@ -55,8 +57,7 @@ Not done:
 - YAML support is minimal and currently stores key mapping mode and assignments.
 - No tests exist yet; current CommandLineTools install does not expose `XCTest`
   or Swift `Testing`.
-- Window cycling/focusing is not implemented yet; current window support is a
-  read-only foundation.
+- Window cycling and search are minimal and do not yet provide MRU ordering.
 - No Developer ID signing, notarization, or installer pipeline exists yet.
 
 ## Product Target
@@ -265,6 +266,10 @@ Tasks:
 - Read windows via Accessibility API. Done for current regular apps.
 - Track window title, owning app, minimized state, bounds, screen, and focus
   state. Basic title/app/minimized/bounds/focused metadata exists.
+- Focus the next readable window with `right cmd + tab`. Minimal implementation
+  exists.
+- Search readable windows by app name or title with `right cmd + space`.
+  Minimal implementation exists.
 - Add AX observers where practical.
 - Keep blocking Accessibility calls off the main thread. Done for snapshot
   reads; refreshes are coalesced to avoid overlapping AX scans.
@@ -281,7 +286,8 @@ Goal: implement keyboard window cycling.
 
 Tasks:
 
-- Intercept Cmd-Tab and Cmd-backtick.
+- Intercept Cmd-Tab and Cmd-backtick. `right cmd + tab` is implemented as the
+  first minimal window-cycle shortcut; system Cmd-Tab replacement is not done.
 - Cycle windows by MRU order.
 - Add same-app cycling.
 - Add OSD list for cycling.

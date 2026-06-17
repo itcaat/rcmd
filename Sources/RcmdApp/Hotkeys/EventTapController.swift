@@ -146,6 +146,26 @@ final class EventTapController {
         if keyEvent.kind == .keyDown,
            rightCommandHeld,
            event.getIntegerValueField(.keyboardEventAutorepeat) == 0,
+           keyEvent.keyCode == KeyCode.tab {
+            consumedKeyCodes.insert(keyEvent.keyCode)
+            emit(KeyShortcut(kind: .cycleWindow, letter: "\t", keyCode: keyEvent.keyCode, timestamp: Date()))
+            scheduleModifierStateReconciliation()
+            return nil
+        }
+
+        if keyEvent.kind == .keyDown,
+           rightCommandHeld,
+           event.getIntegerValueField(.keyboardEventAutorepeat) == 0,
+           keyEvent.keyCode == KeyCode.space {
+            consumedKeyCodes.insert(keyEvent.keyCode)
+            emit(KeyShortcut(kind: .openWindowSearch, letter: " ", keyCode: keyEvent.keyCode, timestamp: Date()))
+            scheduleModifierStateReconciliation()
+            return nil
+        }
+
+        if keyEvent.kind == .keyDown,
+           rightCommandHeld,
+           event.getIntegerValueField(.keyboardEventAutorepeat) == 0,
            let letter = KeyboardLayout.letter(for: keyEvent.keyCode, mode: keyMappingMode) {
             consumedKeyCodes.insert(keyEvent.keyCode)
             let shortcutKind: KeyShortcutKind = rightOptionHeld ? .assign : .activate

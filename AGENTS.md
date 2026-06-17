@@ -36,13 +36,15 @@ Implemented:
 - visual assignment editor with app icons in Settings;
 - Launch at Login setting through `SMAppService`;
 - read-only window diagnostics through Accessibility API;
+- minimal `right cmd + tab` window cycling through Accessibility API;
+- minimal `right cmd + space` window search by app name/title;
 - `.app` bundle packaging with Info.plist, generated AppIcon.icns, DMG output,
   and ad-hoc signing.
 
 Not implemented:
 
 - Xcode project;
-- window cycling/focusing;
+- MRU window cycling and dedicated window switcher UI;
 - no tests;
 - no Developer ID signing or notarization pipeline.
 

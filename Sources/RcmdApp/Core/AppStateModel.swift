@@ -1,5 +1,10 @@
 import Foundation
 
+enum OSDMode: Sendable, Equatable {
+    case assignments
+    case windowSearch
+}
+
 @MainActor
 final class AppStateModel: ObservableObject {
     @Published var accessibilityTrusted = false
@@ -12,6 +17,7 @@ final class AppStateModel: ObservableObject {
     @Published private(set) var launchAtLoginEnabled = false
     @Published private(set) var launchAtLoginStatus = "Unknown"
     @Published private(set) var windows: [WindowInfo] = []
+    @Published private(set) var osdMode: OSDMode = .assignments
     @Published private(set) var lastShortcutMessage = "No shortcut handled yet."
 
     func refreshAccessibilityStatus() {
@@ -39,6 +45,14 @@ final class AppStateModel: ObservableObject {
         self.windows = windows
     }
 
+    func showAssignmentOSD() {
+        osdMode = .assignments
+    }
+
+    func showWindowSearchOSD() {
+        osdMode = .windowSearch
+    }
+
     func record(event: KeyEvent) {
         let line = event.displayDescription
         recentEvents.insert(line, at: 0)
@@ -61,6 +75,27 @@ final class AppStateModel: ObservableObject {
 
     func record(shortcut: KeyShortcut, assignmentResult: ManualAssignmentResult) {
         lastShortcutMessage = "\(shortcut.displayDescription): \(assignmentResult.displayMessage)"
+        statusMessage = lastShortcutMessage
+
+        AppLog.hotkeys.info("\(self.lastShortcutMessage, privacy: .public)")
+    }
+
+    func record(shortcut: KeyShortcut, windowFocusResult: WindowFocusResult) {
+        lastShortcutMessage = "\(shortcut.displayDescription): \(windowFocusResult.displayMessage)"
+        statusMessage = lastShortcutMessage
+
+        AppLog.hotkeys.info("\(self.lastShortcutMessage, privacy: .public)")
+    }
+
+    func recordWindowSearchOpened() {
+        lastShortcutMessage = "right-cmd+space: Window search opened."
+        statusMessage = lastShortcutMessage
+
+        AppLog.hotkeys.info("\(self.lastShortcutMessage, privacy: .public)")
+    }
+
+    func recordWindowSearchFocusResult(_ result: WindowFocusResult) {
+        lastShortcutMessage = "window search: \(result.displayMessage)"
         statusMessage = lastShortcutMessage
 
         AppLog.hotkeys.info("\(self.lastShortcutMessage, privacy: .public)")

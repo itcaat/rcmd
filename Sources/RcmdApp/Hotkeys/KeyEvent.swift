@@ -50,6 +50,10 @@ struct KeyEvent: Sendable, Equatable {
             side = "right-option"
         } else if isLeftOptionKey {
             side = "left-option"
+        } else if keyCode == KeyCode.tab {
+            side = "tab"
+        } else if keyCode == KeyCode.space {
+            side = "space"
         } else if let letter = KeyboardLayout.letter(for: keyCode) {
             side = "key-\(String(letter).uppercased())"
         } else {
@@ -65,4 +69,6 @@ enum KeyCode {
     static let rightCommand: Int64 = 54
     static let leftOption: Int64 = 58
     static let rightOption: Int64 = 61
+    static let tab: Int64 = 48
+    static let space: Int64 = 49
 }
