@@ -16,7 +16,7 @@ struct SearchTextField: NSViewRepresentable {
     }
 
     func makeNSView(context: Context) -> NSTextField {
-        let textField = NSTextField()
+        let textField = SearchNSTextField()
         textField.delegate = context.coordinator
         textField.isBordered = false
         textField.drawsBackground = false
@@ -32,11 +32,13 @@ struct SearchTextField: NSViewRepresentable {
         context.coordinator.onMoveDown = onMoveDown
         context.coordinator.onSubmit = onSubmit
         context.coordinator.onEscape = onEscape
+        let becameActive = isActive && !context.coordinator.wasActive
+        context.coordinator.wasActive = isActive
 
         if let editor = textField.currentEditor() {
             if editor.string != text {
                 editor.string = text
-                editor.selectedRange = NSRange(location: editor.string.utf16.count, length: 0)
+                moveCaretToEnd(in: editor)
             }
         } else if textField.stringValue != text {
             textField.stringValue = text
@@ -47,21 +49,30 @@ struct SearchTextField: NSViewRepresentable {
         textField.isSelectable = isActive
         textField.textColor = isActive ? .labelColor : .secondaryLabelColor
 
-        DispatchQueue.main.async {
-            guard let window = textField.window else {
-                return
+        guard let window = textField.window else {
+            return
+        }
+
+        if isActive {
+            if becameActive || textField.currentEditor() == nil {
+                window.makeFirstResponder(textField)
             }
 
-            if isActive {
-                window.makeFirstResponder(textField)
-            } else if let editor = textField.currentEditor(), window.firstResponder === editor {
-                window.makeFirstResponder(nil)
+            if becameActive, let editor = textField.currentEditor() {
+                moveCaretToEnd(in: editor)
             }
+        } else if let editor = textField.currentEditor(), window.firstResponder === editor {
+            window.makeFirstResponder(nil)
         }
+    }
+
+    private func moveCaretToEnd(in editor: NSText) {
+        editor.selectedRange = NSRange(location: editor.string.utf16.count, length: 0)
     }
 
     final class Coordinator: NSObject, NSTextFieldDelegate {
         @Binding private var text: String
+        var wasActive = false
         var onMoveUp: (() -> Void)?
         var onMoveDown: (() -> Void)?
         var onSubmit: (() -> Void)?
@@ -101,5 +112,26 @@ struct SearchTextField: NSViewRepresentable {
                 return false
             }
         }
+    }
+}
+
+private final class SearchNSTextField: NSTextField {
+    override func becomeFirstResponder() -> Bool {
+        let didBecomeFirstResponder = super.becomeFirstResponder()
+        moveCaretToEnd()
+        return didBecomeFirstResponder
+    }
+
+    override func selectText(_ sender: Any?) {
+        window?.makeFirstResponder(self)
+        moveCaretToEnd()
+    }
+
+    private func moveCaretToEnd() {
+        guard let editor = currentEditor() else {
+            return
+        }
+
+        editor.selectedRange = NSRange(location: editor.string.utf16.count, length: 0)
     }
 }

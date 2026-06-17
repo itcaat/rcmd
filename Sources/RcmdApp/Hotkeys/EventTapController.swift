@@ -149,10 +149,6 @@ final class EventTapController {
             if handleWindowSearchKeyDown(keyEvent, event: event) {
                 return nil
             }
-
-            if rightCommandHeld {
-                return nil
-            }
         }
 
         if keyEvent.kind == .keyDown,
@@ -190,6 +186,10 @@ final class EventTapController {
     }
 
     private func handleWindowSearchKeyDown(_ keyEvent: KeyEvent, event: CGEvent) -> Bool {
+        if shouldPassThroughSystemShortcut(event, keyEvent: keyEvent) {
+            return false
+        }
+
         if rightCommandHeld,
            event.getIntegerValueField(.keyboardEventAutorepeat) == 0,
            keyEvent.keyCode == KeyCode.space {
@@ -226,6 +226,20 @@ final class EventTapController {
 
         if let letter = KeyboardLayout.letter(for: keyEvent.keyCode, mode: keyMappingMode) {
             emit(.insertText(String(letter)))
+            return true
+        }
+
+        return false
+    }
+
+    private func shouldPassThroughSystemShortcut(_ event: CGEvent, keyEvent: KeyEvent) -> Bool {
+        let flags = event.flags
+
+        if flags.contains(.maskControl) || flags.contains(.maskAlternate) {
+            return true
+        }
+
+        if flags.contains(.maskCommand), !rightCommandHeld {
             return true
         }
 
@@ -329,6 +343,13 @@ final class EventTapController {
 
     private func emit(_ action: WindowSearchKeyAction) {
         guard let onWindowSearchKeyAction else {
+            return
+        }
+
+        if Thread.isMainThread {
+            MainActor.assumeIsolated {
+                onWindowSearchKeyAction(action)
+            }
             return
         }
 

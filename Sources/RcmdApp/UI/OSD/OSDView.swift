@@ -5,11 +5,17 @@ struct OSDView: View {
     let actions: OSDActions
 
     @State private var searchWindows: [WindowInfo] = []
+    @State private var visibleSearchStartIndex = 0
+    @Namespace private var selectionNamespace
 
     private let columns = [
         GridItem(.adaptive(minimum: 178), spacing: 8)
     ]
     private let contentHeight: CGFloat = 340
+    private let visibleSearchRowCount = 7
+    private let scrollComfortRows = 1
+    private let selectionAnimation = Animation.interactiveSpring(response: 0.22, dampingFraction: 0.86)
+    private let scrollAnimation = Animation.easeInOut(duration: 0.18)
 
     private var filteredWindows: [WindowInfo] {
         WindowSearchFilter.filteredWindows(searchWindows, query: appState.windowSearchQuery)
@@ -52,6 +58,7 @@ struct OSDView: View {
         }
         .onChange(of: appState.osdMode) { _, mode in
             if mode == .windowSearch {
+                visibleSearchStartIndex = 0
                 syncSearchWindows()
             }
 
@@ -59,10 +66,12 @@ struct OSDView: View {
         }
         .onChange(of: appState.windowSearchQuery) { _, _ in
             DispatchQueue.main.async {
+                visibleSearchStartIndex = 0
                 updateSelection()
             }
         }
         .onChange(of: appState.windows) { _, _ in
+            visibleSearchStartIndex = 0
             syncSearchWindows()
             updateSelection()
         }
@@ -216,15 +225,14 @@ struct OSDView: View {
                                 .id(window.id)
                             }
                         }
+                        .animation(selectionAnimation, value: appState.selectedWindowID)
                     }
                     .onChange(of: appState.selectedWindowID) { _, selectedWindowID in
                         guard let selectedWindowID else {
                             return
                         }
 
-                        withAnimation(.easeOut(duration: 0.10)) {
-                            proxy.scrollTo(selectedWindowID, anchor: .center)
-                        }
+                        scrollSelectionIntoComfortZone(selectedWindowID, proxy: proxy)
                     }
                 }
                 .scrollIndicators(.hidden)
@@ -259,8 +267,13 @@ struct OSDView: View {
         }
         .padding(.horizontal, 10)
         .frame(height: 44)
-        .background(isSelected ? Color.accentColor.opacity(0.16) : Color.clear)
-        .clipShape(RoundedRectangle(cornerRadius: 7, style: .continuous))
+        .background {
+            if isSelected {
+                RoundedRectangle(cornerRadius: 7, style: .continuous)
+                    .fill(Color.accentColor.opacity(0.16))
+                    .matchedGeometryEffect(id: "window-search-selection", in: selectionNamespace)
+            }
+        }
         .contentShape(Rectangle())
     }
 
@@ -349,5 +362,43 @@ struct OSDView: View {
             min(displayedWindows.index(before: displayedWindows.endIndex), currentIndex + offset)
         )
         appState.selectWindow(id: displayedWindows[nextIndex].id)
+    }
+
+    private func scrollSelectionIntoComfortZone(_ selectedWindowID: WindowInfo.ID, proxy: ScrollViewProxy) {
+        guard let selectedIndex = displayedWindows.firstIndex(where: { $0.id == selectedWindowID }) else {
+            return
+        }
+
+        let maxStartIndex = max(0, displayedWindows.count - visibleSearchRowCount)
+        let currentStartIndex = min(visibleSearchStartIndex, maxStartIndex)
+        let comfortTopIndex = currentStartIndex + scrollComfortRows
+        let comfortBottomIndex = currentStartIndex + visibleSearchRowCount - scrollComfortRows - 1
+
+        let nextStartIndex: Int
+        if selectedIndex < comfortTopIndex {
+            nextStartIndex = max(0, selectedIndex - scrollComfortRows)
+        } else if selectedIndex > comfortBottomIndex {
+            nextStartIndex = min(maxStartIndex, selectedIndex - visibleSearchRowCount + scrollComfortRows + 1)
+        } else {
+            visibleSearchStartIndex = currentStartIndex
+            return
+        }
+
+        visibleSearchStartIndex = nextStartIndex
+        let targetWindowID = displayedWindows[nextStartIndex].id
+
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.07) {
+            guard appState.osdMode == .windowSearch else {
+                return
+            }
+
+            guard appState.selectedWindowID == selectedWindowID else {
+                return
+            }
+
+            withAnimation(scrollAnimation) {
+                proxy.scrollTo(targetWindowID, anchor: .top)
+            }
+        }
     }
 }

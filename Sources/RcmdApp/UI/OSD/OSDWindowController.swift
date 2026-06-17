@@ -40,19 +40,8 @@ final class OSDWindowController: NSObject, NSWindowDelegate {
         }
 
         panel.alphaValue = 1
-        panel.makeKeyAndOrderFront(nil)
         NSApp.activate(ignoringOtherApps: true)
-
-        DispatchQueue.main.async { [weak self, weak panel] in
-            guard let self, let panel else {
-                return
-            }
-
-            if !panel.isVisible {
-                self.position(panel, preferredSize: NSSize(width: 720, height: 430))
-            }
-            panel.makeKeyAndOrderFront(nil)
-        }
+        panel.makeKeyAndOrderFront(nil)
     }
 
     func activateSearchIfNeeded() {
@@ -61,9 +50,8 @@ final class OSDWindowController: NSObject, NSWindowDelegate {
             return
         }
 
-        DispatchQueue.main.async { [weak panel] in
-            panel?.makeKeyAndOrderFront(nil)
-        }
+        NSApp.activate(ignoringOtherApps: true)
+        panel.makeKeyAndOrderFront(nil)
     }
 
     func resignSearchIfNeeded() {
