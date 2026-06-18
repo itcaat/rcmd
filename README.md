@@ -22,6 +22,7 @@ left Command shortcuts alone.
 - Press **Right Command + Tab** to focus the next readable window.
 - Create manual assignments with **Right Command + Right Option + letter**.
 - Edit assignments, key mapping, Launch at Login, and diagnostics in Settings.
+- Optionally minimize the active window when its app shortcut is pressed again.
 - Persist config in readable YAML at `~/.config/rcmd/config.yaml`.
 - Package the app as a local DMG with an `Applications` shortcut.
 
@@ -74,6 +75,7 @@ the permission.
 | --- | --- |
 | `Right Command` | Show app assignment OSD |
 | `Right Command + letter` | Focus or launch assigned app |
+| `Right Command + letter` again | Optionally minimize the active window |
 | `Right Command + Space` | Toggle window search |
 | `Up / Down` in search | Move selected window |
 | `Enter` in search | Focus selected window |
@@ -87,7 +89,8 @@ The Settings window is split into focused panes:
 
 - **Overview**: Accessibility, keyboard monitor, Launch at Login, app/window
   counts.
-- **Shortcuts**: active shortcuts and key mapping mode.
+- **Shortcuts**: active shortcuts, repeated-shortcut behavior, and key mapping
+  mode.
 - **Assignments**: manual assignment editor and current dynamic assignments.
 - **Windows**: readable Accessibility window metadata.
 - **Diagnostics**: status messages and recent key events.
@@ -111,6 +114,7 @@ Example:
 
 ```yaml
 keyMappingMode: activeLayout
+minimizeActiveWindowOnRepeatedShortcut: false
 assignments:
   c: com.google.Chrome
   f: com.apple.finder

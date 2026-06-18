@@ -39,13 +39,14 @@ struct AppCatalogEntry: Identifiable, Sendable, Equatable {
 
 enum AppActivationResult: Sendable, Equatable {
     case focused(AppAssignment)
+    case minimized(AppAssignment)
     case launched(AppAssignment)
     case unassigned(Character)
     case failed(AppAssignment, String)
 
     var assignment: AppAssignment? {
         switch self {
-        case .focused(let assignment), .launched(let assignment), .failed(let assignment, _):
+        case .focused(let assignment), .minimized(let assignment), .launched(let assignment), .failed(let assignment, _):
             assignment
         case .unassigned:
             nil
@@ -56,6 +57,8 @@ enum AppActivationResult: Sendable, Equatable {
         switch self {
         case .focused(let assignment):
             "\(assignment.appName) focused."
+        case .minimized(let assignment):
+            "\(assignment.appName) active window minimized."
         case .launched(let assignment):
             "\(assignment.appName) launched."
         case .unassigned(let letter):
@@ -155,6 +158,19 @@ final class AppRegistry {
         if let app = workspace.runningApplications.first(where: { runningApp in
             runningApp.bundleIdentifier == assignment.bundleIdentifier
         }) {
+            if assignmentStore.minimizeActiveWindowOnRepeatedShortcut,
+               workspace.frontmostApplication?.bundleIdentifier == assignment.bundleIdentifier {
+                switch minimizeFocusedWindowIfVisible(for: app) {
+                case .minimized:
+                    AppLog.app.info("Minimized active window for \(assignment.appName, privacy: .public) via repeated \(String(normalizedLetter), privacy: .public)")
+                    return .minimized(assignment)
+                case .shouldFocus:
+                    break
+                case .failed(let message):
+                    return .failed(assignment, message)
+                }
+            }
+
             app.unhide()
             restoreMinimizedWindows(for: app)
             app.activate(options: [.activateAllWindows])
@@ -460,6 +476,27 @@ final class AppRegistry {
         }
     }
 
+    private func minimizeFocusedWindowIfVisible(for app: NSRunningApplication) -> ActiveWindowMinimizeResult {
+        guard AccessibilityPermission.isTrusted, app.processIdentifier > 0 else {
+            return .failed("Accessibility permission is required")
+        }
+
+        let appElement = AXUIElementCreateApplication(app.processIdentifier)
+        guard let windowValue = copyAttribute("AXFocusedWindow", from: appElement)
+            ?? copyAttribute("AXMainWindow", from: appElement) else {
+            return .shouldFocus
+        }
+
+        let windowElement = windowValue as! AXUIElement
+
+        if copyAttribute("AXMinimized", from: windowElement) as? Bool == true {
+            return .shouldFocus
+        }
+
+        let result = AXUIElementSetAttributeValue(windowElement, "AXMinimized" as CFString, kCFBooleanTrue)
+        return result == .success ? .minimized : .failed("could not minimize active window")
+    }
+
     private func copyAttribute(_ attribute: String, from element: AXUIElement) -> CFTypeRef? {
         var value: CFTypeRef?
         let result = AXUIElementCopyAttributeValue(element, attribute as CFString, &value)
@@ -488,4 +525,10 @@ private struct InstalledApplication: Sendable, Equatable {
     let appName: String
     let bundleIdentifier: String
     let appURL: URL
+}
+
+private enum ActiveWindowMinimizeResult {
+    case minimized
+    case shouldFocus
+    case failed(String)
 }

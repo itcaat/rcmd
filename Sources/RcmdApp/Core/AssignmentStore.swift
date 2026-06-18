@@ -22,6 +22,7 @@ enum KeyMappingMode: String, CaseIterable, Identifiable, Sendable {
 final class AssignmentStore {
     private(set) var assignmentsByLetter: [Character: String] = [:]
     private(set) var keyMappingMode: KeyMappingMode = .activeLayout
+    private(set) var minimizeActiveWindowOnRepeatedShortcut = false
 
     private let configURL: URL
 
@@ -49,6 +50,11 @@ final class AssignmentStore {
         save()
     }
 
+    func setMinimizeActiveWindowOnRepeatedShortcut(_ enabled: Bool) {
+        minimizeActiveWindowOnRepeatedShortcut = enabled
+        save()
+    }
+
     private func load() {
         guard
             let contents = try? String(contentsOf: configURL, encoding: .utf8),
@@ -60,6 +66,7 @@ final class AssignmentStore {
 
         var parsedAssignments: [Character: String] = [:]
         var parsedKeyMappingMode = KeyMappingMode.activeLayout
+        var parsedMinimizeActiveWindowOnRepeatedShortcut = false
         var inAssignmentsSection = false
 
         for rawLine in contents.components(separatedBy: .newlines) {
@@ -84,6 +91,10 @@ final class AssignmentStore {
 
                 if key == "keyMappingMode", let mode = KeyMappingMode(rawValue: value) {
                     parsedKeyMappingMode = mode
+                }
+
+                if key == "minimizeActiveWindowOnRepeatedShortcut" {
+                    parsedMinimizeActiveWindowOnRepeatedShortcut = value == "true"
                 }
 
                 continue
@@ -111,6 +122,7 @@ final class AssignmentStore {
 
         assignmentsByLetter = parsedAssignments
         keyMappingMode = parsedKeyMappingMode
+        minimizeActiveWindowOnRepeatedShortcut = parsedMinimizeActiveWindowOnRepeatedShortcut
     }
 
     private func save() {
@@ -123,6 +135,7 @@ final class AssignmentStore {
             var lines = [
                 "# rcmd configuration",
                 "keyMappingMode: \(keyMappingMode.rawValue)",
+                "minimizeActiveWindowOnRepeatedShortcut: \(minimizeActiveWindowOnRepeatedShortcut)",
                 "assignments:"
             ]
 

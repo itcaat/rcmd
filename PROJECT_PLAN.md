@@ -1,6 +1,6 @@
 # rcmd-like macOS App Project Plan
 
-Last updated: 2026-06-17
+Last updated: 2026-06-18
 
 ## Purpose
 
@@ -33,6 +33,9 @@ Done:
 - Layout-aware key translation exists for Latin keyboard layouts.
 - Non-Latin keyboard layouts currently use physical QWERTY fallback.
 - Key mapping mode is configurable and persisted in config.
+- Optional repeated-shortcut behavior can minimize the active window when the
+  target app is already frontmost; it is off by default and persisted in
+  config.
 - Dynamic assignments for running and installed apps exist.
 - `right cmd + letter` can focus or launch assigned apps.
 - Manual assignment capture exists through `right cmd + right option + letter`.

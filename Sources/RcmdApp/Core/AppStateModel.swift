@@ -14,6 +14,7 @@ final class AppStateModel: ObservableObject {
     @Published private(set) var assignments: [AppAssignment] = []
     @Published private(set) var appCatalog: [AppCatalogEntry] = []
     @Published private(set) var keyMappingMode: KeyMappingMode = .activeLayout
+    @Published private(set) var minimizeActiveWindowOnRepeatedShortcut = false
     @Published private(set) var launchAtLoginEnabled = false
     @Published private(set) var launchAtLoginStatus = "Unknown"
     @Published private(set) var windows: [WindowInfo] = []
@@ -36,6 +37,10 @@ final class AppStateModel: ObservableObject {
 
     func refreshKeyMappingMode(_ mode: KeyMappingMode) {
         keyMappingMode = mode
+    }
+
+    func refreshMinimizeActiveWindowOnRepeatedShortcut(_ enabled: Bool) {
+        minimizeActiveWindowOnRepeatedShortcut = enabled
     }
 
     func refreshLaunchAtLogin(_ state: LaunchAtLoginState) {
@@ -143,6 +148,13 @@ final class AppStateModel: ObservableObject {
 
     func recordKeyMappingModeChange(_ mode: KeyMappingMode) {
         lastShortcutMessage = "Key mapping mode set to \(mode.displayName)."
+        statusMessage = lastShortcutMessage
+
+        AppLog.app.info("\(self.lastShortcutMessage, privacy: .public)")
+    }
+
+    func recordMinimizeActiveWindowOnRepeatedShortcutChange(_ enabled: Bool) {
+        lastShortcutMessage = "Repeated app shortcut minimize is \(enabled ? "enabled" : "disabled")."
         statusMessage = lastShortcutMessage
 
         AppLog.app.info("\(self.lastShortcutMessage, privacy: .public)")

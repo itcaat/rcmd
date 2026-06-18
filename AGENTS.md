@@ -30,6 +30,8 @@ Implemented:
 - layout-aware key translation for Latin keyboard layouts;
 - physical QWERTY fallback for non-Latin keyboard layouts;
 - configurable key mapping mode persisted in config;
+- optional repeated app shortcut behavior to minimize the active window,
+  persisted in config and disabled by default;
 - dynamic assignments for running and installed apps;
 - `right cmd + letter` focusing or launching assigned apps;
 - manual assignment capture with `right cmd + right option + letter`;

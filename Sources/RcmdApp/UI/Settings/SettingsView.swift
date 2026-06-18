@@ -273,6 +273,23 @@ struct SettingsView: View {
                 }
             }
 
+            settingsGroup("Behavior") {
+                VStack(alignment: .leading, spacing: 8) {
+                    Toggle(
+                        "Minimize active window on repeated app shortcut",
+                        isOn: Binding(
+                            get: { appState.minimizeActiveWindowOnRepeatedShortcut },
+                            set: { enabled in actions.setMinimizeActiveWindowOnRepeatedShortcut(enabled) }
+                        )
+                    )
+
+                    Text("When the target app is already active, pressing its Right Cmd shortcut again minimizes the focused window instead of refocusing the app.")
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                        .fixedSize(horizontal: false, vertical: true)
+                }
+            }
+
             settingsGroup("Key mapping") {
                 VStack(alignment: .leading, spacing: 10) {
                     Picker(

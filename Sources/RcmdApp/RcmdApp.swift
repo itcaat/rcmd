@@ -41,6 +41,9 @@ final class RcmdApp: NSObject, NSApplicationDelegate {
                 setKeyMappingMode: { [weak self] mode in
                     self?.setKeyMappingMode(mode)
                 },
+                setMinimizeActiveWindowOnRepeatedShortcut: { [weak self] enabled in
+                    self?.setMinimizeActiveWindowOnRepeatedShortcut(enabled)
+                },
                 setLaunchAtLogin: { [weak self] enabled in
                     self?.setLaunchAtLoginEnabled(enabled)
                 }
@@ -93,6 +96,7 @@ final class RcmdApp: NSObject, NSApplicationDelegate {
 
         refreshAccessibilityAndStartMonitorIfReady()
         refreshKeyMappingMode()
+        refreshMinimizeActiveWindowOnRepeatedShortcut()
         refreshLaunchAtLogin()
         refreshAssignments()
         refreshAppCatalog()
@@ -289,6 +293,10 @@ final class RcmdApp: NSObject, NSApplicationDelegate {
         appState.refreshKeyMappingMode(assignmentStore.keyMappingMode)
     }
 
+    private func refreshMinimizeActiveWindowOnRepeatedShortcut() {
+        appState.refreshMinimizeActiveWindowOnRepeatedShortcut(assignmentStore.minimizeActiveWindowOnRepeatedShortcut)
+    }
+
     private func refreshLaunchAtLogin() {
         appState.refreshLaunchAtLogin(launchAtLoginController.currentState())
     }
@@ -313,6 +321,13 @@ final class RcmdApp: NSObject, NSApplicationDelegate {
         assignmentStore.setKeyMappingMode(mode)
         refreshKeyMappingMode()
         appState.recordKeyMappingModeChange(mode)
+        menuBarController?.refresh()
+    }
+
+    func setMinimizeActiveWindowOnRepeatedShortcut(_ enabled: Bool) {
+        assignmentStore.setMinimizeActiveWindowOnRepeatedShortcut(enabled)
+        refreshMinimizeActiveWindowOnRepeatedShortcut()
+        appState.recordMinimizeActiveWindowOnRepeatedShortcutChange(enabled)
         menuBarController?.refresh()
     }
 
