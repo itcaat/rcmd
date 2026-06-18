@@ -65,8 +65,8 @@ Not done:
 
 - No Xcode project exists yet.
 - YAML support is minimal and currently stores key mapping mode and assignments.
-- No tests exist yet; current CommandLineTools install does not expose `XCTest`
-  or Swift `Testing`.
+- XCTest target exists with initial coverage for shortcut routing, config
+  persistence, and window search filtering.
 - Window cycling and search are basic and do not yet provide MRU ordering or
   ranked fuzzy search.
 - Window search does not yet expose close/quit/hide actions.
@@ -435,7 +435,8 @@ Recommended next action:
 3. Continue Milestone 4 by adding AX observers or a lightweight refresh
    strategy for window title/focus/order updates.
 4. Broaden config parsing if more YAML settings are introduced.
-5. Add tests once a usable XCTest/Swift Testing toolchain is available.
+5. Broaden tests around shortcut routing, app activation decisions, and window
+   search ranking as those areas stabilize.
 6. Add Developer ID signing/notarization when distribution becomes necessary.
 
 ## Definition of Done for MVP v0.1

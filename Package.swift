@@ -14,6 +14,11 @@ let package = Package(
         .executableTarget(
             name: "RcmdApp",
             path: "Sources/RcmdApp"
+        ),
+        .testTarget(
+            name: "RcmdAppTests",
+            dependencies: ["RcmdApp"],
+            path: "Tests/RcmdAppTests"
         )
     ]
 )

@@ -28,9 +28,7 @@ final class EventTapController {
 
     private var eventTap: CFMachPort?
     private var runLoopSource: CFRunLoopSource?
-    private var rightCommandHeld = false
-    private var rightOptionHeld = false
-    private var consumedKeyCodes = Set<Int64>()
+    private var router = KeyEventRouter()
     private var modifierReconciliationWorkItem: DispatchWorkItem?
 
     var isRunning: Bool {
@@ -94,8 +92,10 @@ final class EventTapController {
         runLoopSource = nil
         modifierReconciliationWorkItem?.cancel()
         modifierReconciliationWorkItem = nil
-        resetRightCommandState()
-        rightOptionHeld = false
+        if router.resetRightCommandState() {
+            emitRightCommandChanged(false)
+        }
+        router.resetAll()
         AppLog.hotkeys.info("Keyboard event tap stopped")
     }
 
@@ -106,8 +106,10 @@ final class EventTapController {
             }
 
             emit(KeyEvent(kind: .tapDisabled, keyCode: -1, rawFlags: 0, timestamp: Date()))
-            resetRightCommandState()
-            rightOptionHeld = false
+            if router.resetRightCommandState() {
+                emitRightCommandChanged(false)
+            }
+            router.resetAll()
             return Unmanaged.passUnretained(event)
         }
 
@@ -119,131 +121,33 @@ final class EventTapController {
         )
 
         emit(keyEvent)
-        reconcileModifierState(from: keyEvent)
 
-        if keyEvent.kind == .flagsChanged, keyEvent.isRightCommandKey {
-            let wasHeld = rightCommandHeld
-            rightCommandHeld = keyEvent.commandDown
-            if !rightCommandHeld {
-                rightOptionHeld = false
-                consumedKeyCodes.removeAll()
-            }
+        let decision = router.route(
+            KeyEventRoutingInput(
+                event: keyEvent,
+                isAutorepeat: event.getIntegerValueField(.keyboardEventAutorepeat) != 0,
+                isWindowSearchActive: isWindowSearchActive,
+                keyMappingMode: keyMappingMode,
+                printableText: keyEvent.kind == .keyDown ? printableText(from: event) : nil
+            )
+        )
 
-            if wasHeld != rightCommandHeld {
-                emitRightCommandChanged(rightCommandHeld)
-            }
-
+        switch decision {
+        case .passThrough:
+            return Unmanaged.passUnretained(event)
+        case .suppress:
+            return nil
+        case .shortcut(let shortcut):
+            emit(shortcut)
+            scheduleModifierStateReconciliation()
+            return nil
+        case .windowSearchAction(let action):
+            emit(action)
+            return nil
+        case .rightCommandChanged(let isHeld):
+            emitRightCommandChanged(isHeld)
             return Unmanaged.passUnretained(event)
         }
-
-        if keyEvent.kind == .flagsChanged, keyEvent.isRightOptionKey {
-            rightOptionHeld = keyEvent.optionDown
-            return Unmanaged.passUnretained(event)
-        }
-
-        if keyEvent.kind == .keyUp, consumedKeyCodes.remove(keyEvent.keyCode) != nil {
-            return nil
-        }
-
-        if keyEvent.kind == .keyDown, isWindowSearchActive {
-            if handleWindowSearchKeyDown(keyEvent, event: event) {
-                return nil
-            }
-        }
-
-        if keyEvent.kind == .keyDown,
-           rightCommandHeld,
-           event.getIntegerValueField(.keyboardEventAutorepeat) == 0,
-           keyEvent.keyCode == KeyCode.tab {
-            consumedKeyCodes.insert(keyEvent.keyCode)
-            emit(KeyShortcut(kind: .cycleWindow, letter: "\t", keyCode: keyEvent.keyCode, timestamp: Date()))
-            scheduleModifierStateReconciliation()
-            return nil
-        }
-
-        if keyEvent.kind == .keyDown,
-           rightCommandHeld,
-           event.getIntegerValueField(.keyboardEventAutorepeat) == 0,
-           keyEvent.keyCode == KeyCode.space {
-            consumedKeyCodes.insert(keyEvent.keyCode)
-            emit(KeyShortcut(kind: .openWindowSearch, letter: " ", keyCode: keyEvent.keyCode, timestamp: Date()))
-            scheduleModifierStateReconciliation()
-            return nil
-        }
-
-        if keyEvent.kind == .keyDown,
-           rightCommandHeld,
-           event.getIntegerValueField(.keyboardEventAutorepeat) == 0,
-           let letter = KeyboardLayout.letter(for: keyEvent.keyCode, mode: keyMappingMode) {
-            consumedKeyCodes.insert(keyEvent.keyCode)
-            let shortcutKind: KeyShortcutKind = rightOptionHeld ? .assign : .activate
-            emit(KeyShortcut(kind: shortcutKind, letter: letter, keyCode: keyEvent.keyCode, timestamp: Date()))
-            scheduleModifierStateReconciliation()
-            return nil
-        }
-
-        return Unmanaged.passUnretained(event)
-    }
-
-    private func handleWindowSearchKeyDown(_ keyEvent: KeyEvent, event: CGEvent) -> Bool {
-        if shouldPassThroughSystemShortcut(event, keyEvent: keyEvent) {
-            return false
-        }
-
-        if rightCommandHeld,
-           event.getIntegerValueField(.keyboardEventAutorepeat) == 0,
-           keyEvent.keyCode == KeyCode.space {
-            consumedKeyCodes.insert(keyEvent.keyCode)
-            emit(KeyShortcut(kind: .openWindowSearch, letter: " ", keyCode: keyEvent.keyCode, timestamp: Date()))
-            scheduleModifierStateReconciliation()
-            return true
-        }
-
-        switch keyEvent.keyCode {
-        case KeyCode.arrowUp:
-            emit(.moveUp)
-            return true
-        case KeyCode.arrowDown:
-            emit(.moveDown)
-            return true
-        case KeyCode.return, KeyCode.keypadEnter:
-            emit(.submit)
-            return true
-        case KeyCode.escape:
-            emit(.close)
-            return true
-        case KeyCode.delete:
-            emit(.deleteBackward)
-            return true
-        default:
-            break
-        }
-
-        if let text = printableText(from: event) {
-            emit(.insertText(text))
-            return true
-        }
-
-        if let letter = KeyboardLayout.letter(for: keyEvent.keyCode, mode: keyMappingMode) {
-            emit(.insertText(String(letter)))
-            return true
-        }
-
-        return false
-    }
-
-    private func shouldPassThroughSystemShortcut(_ event: CGEvent, keyEvent: KeyEvent) -> Bool {
-        let flags = event.flags
-
-        if flags.contains(.maskControl) || flags.contains(.maskAlternate) {
-            return true
-        }
-
-        if flags.contains(.maskCommand), !rightCommandHeld {
-            return true
-        }
-
-        return false
     }
 
     private func printableText(from event: CGEvent) -> String? {
@@ -274,20 +178,6 @@ final class EventTapController {
         return text
     }
 
-    private func reconcileModifierState(from event: KeyEvent) {
-        guard event.kind == .keyDown || event.kind == .keyUp else {
-            return
-        }
-
-        if rightCommandHeld, !event.commandDown {
-            resetRightCommandState()
-        }
-
-        if rightOptionHeld, !event.optionDown {
-            rightOptionHeld = false
-        }
-    }
-
     private func scheduleModifierStateReconciliation() {
         modifierReconciliationWorkItem?.cancel()
 
@@ -302,21 +192,7 @@ final class EventTapController {
     private func reconcileModifierStateFromSystemFlags() {
         let flags = CGEventSource.flagsState(.combinedSessionState)
 
-        if rightCommandHeld, !flags.contains(.maskCommand) {
-            resetRightCommandState()
-        }
-
-        if rightOptionHeld, !flags.contains(.maskAlternate) {
-            rightOptionHeld = false
-        }
-    }
-
-    private func resetRightCommandState() {
-        let wasHeld = rightCommandHeld
-        rightCommandHeld = false
-        consumedKeyCodes.removeAll()
-
-        if wasHeld {
+        if router.reconcileModifierStateFromSystemFlags(flags) {
             emitRightCommandChanged(false)
         }
     }

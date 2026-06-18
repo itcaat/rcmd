@@ -146,9 +146,8 @@ Package:
 make package VERSION=0.1.0
 ```
 
-`make ci` builds the SwiftPM package, runs tests when a `Tests/` directory is
-available, and verifies app bundle packaging. The current project state has no
-tests, so the test step is skipped until tests are added.
+`make ci` builds the SwiftPM package, runs the XCTest suite, and verifies app
+bundle packaging.
 
 ## Logs
 
@@ -199,8 +198,8 @@ Public distribution still needs:
   search.
 - Window search does not yet expose close, quit, or hide actions.
 - YAML support is intentionally minimal.
-- No tests yet; the selected Command Line Tools install does not expose
-  `XCTest` or Swift `Testing` for this package.
+- Test coverage is intentionally small and currently focuses on shortcut
+  routing, config persistence, and window search filtering.
 
 ## Project Notes
 

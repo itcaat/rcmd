@@ -55,7 +55,8 @@ Not implemented:
 - Xcode project;
 - MRU window cycling, ranked fuzzy search, and dedicated window switcher UI;
 - close/quit/hide actions from window search results;
-- no tests;
+- XCTest target with initial coverage for shortcut routing, config persistence,
+  and window search filtering;
 - no Developer ID signing or notarization pipeline.
 
 ## Immediate Priority
@@ -70,7 +71,8 @@ The next practical tasks are:
 3. continue window foundation by adding AX observers or a lightweight refresh
    strategy for window title/focus/order updates;
 4. improve config parsing if broader YAML settings are added;
-5. add tests once a usable XCTest/Swift Testing toolchain is available;
+5. broaden tests around shortcut routing, app activation decisions, and window
+   search ranking as those areas stabilize;
 6. add Developer ID signing/notarization when distribution becomes necessary.
 
 Do not start with Spaces, Stages, licensing, or Cmd-Tab replacement. Those are
@@ -95,9 +97,8 @@ later milestones and depend on the app/window foundation.
 - Use small, focused commits if committing is requested.
 - After code exists, run the smallest relevant build/test command before
   reporting completion.
-- Current verification commands are `swift build` and `make package`.
-  `swift test` reports no tests because the selected CommandLineTools install
-  does not expose a test module.
+- Current verification commands are `swift build`, `swift test`, and
+  `make package`.
 - Update `PROJECT_PLAN.md` whenever scope, status, or milestone order changes.
 - Update this file only for agent workflow rules, not detailed product planning.
 

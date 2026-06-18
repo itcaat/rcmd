@@ -65,6 +65,8 @@ struct KeyEvent: Sendable, Equatable {
 }
 
 enum KeyCode {
+    static let c: Int64 = 8
+    static let d: Int64 = 2
     static let leftCommand: Int64 = 55
     static let rightCommand: Int64 = 54
     static let leftOption: Int64 = 58
