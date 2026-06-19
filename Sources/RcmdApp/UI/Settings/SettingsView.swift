@@ -99,7 +99,7 @@ struct SettingsView: View {
             .padding(.bottom, 16)
         }
         .frame(width: 190)
-        .background(Color(nsColor: .underPageBackgroundColor))
+        .background(Color(nsColor: .windowBackgroundColor))
     }
 
     private func sidebarButton(_ pane: Pane) -> some View {
