@@ -182,21 +182,13 @@ final class AppRegistry {
             return .failed(assignment, "missing application URL")
         }
 
-        let configuration = NSWorkspace.OpenConfiguration()
-        configuration.activates = true
-        configuration.addsToRecentItems = false
-
-        return await withCheckedContinuation { continuation in
-            workspace.openApplication(at: appURL, configuration: configuration) { _, error in
-                if let error {
-                    AppLog.app.error("Failed to launch \(assignment.appName, privacy: .public): \(error.localizedDescription, privacy: .public)")
-                    continuation.resume(returning: .failed(assignment, error.localizedDescription))
-                } else {
-                    AppLog.app.info("Launched \(assignment.appName, privacy: .public) for \(String(normalizedLetter), privacy: .public)")
-                    continuation.resume(returning: .launched(assignment))
-                }
-            }
+        if let launchError = await openApplication(at: appURL) {
+            AppLog.app.error("Failed to launch \(assignment.appName, privacy: .public): \(launchError, privacy: .public)")
+            return .failed(assignment, launchError)
         }
+
+        AppLog.app.info("Launched \(assignment.appName, privacy: .public) for \(String(normalizedLetter), privacy: .public)")
+        return .launched(assignment)
     }
 
     func assignFrontmostApp(to letter: Character) -> ManualAssignmentResult {
@@ -531,4 +523,18 @@ private enum ActiveWindowMinimizeResult {
     case minimized
     case shouldFocus
     case failed(String)
+}
+
+private func openApplication(
+    at appURL: URL
+) async -> String? {
+    let configuration = NSWorkspace.OpenConfiguration()
+    configuration.activates = true
+    configuration.addsToRecentItems = false
+
+    return await withCheckedContinuation { continuation in
+        NSWorkspace.shared.openApplication(at: appURL, configuration: configuration) { _, error in
+            continuation.resume(returning: error?.localizedDescription)
+        }
+    }
 }
