@@ -1,6 +1,6 @@
 # rcmd-like macOS App Project Plan
 
-Last updated: 2026-06-18
+Last updated: 2026-06-19
 
 ## Purpose
 
@@ -55,6 +55,8 @@ Done:
   uses smoothed selection and edge scrolling.
 - Window search input is handled through the event tap while preserving system
   language-switching shortcuts.
+- Window/app refresh work is debounced and avoids periodic full Accessibility
+  polling while idle; installed app catalog scans are cached during runtime.
 - GitHub Actions CI exists for branch pushes and pull requests.
 - Tag-driven GitHub Actions release publishing exists for `v*.*.*` tags.
 - Local `make` targets exist for CI, DMG packaging, and release tag creation.

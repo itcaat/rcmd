@@ -16,6 +16,8 @@ final class RcmdApp: NSObject, NSApplicationDelegate {
     private var pendingOSDShowWorkItem: DispatchWorkItem?
     private var isWindowRefreshInFlight = false
     private var needsWindowRefresh = false
+    private var windowRefreshGeneration = 0
+    private var appStateRefreshGeneration = 0
     private var workspaceObservers: [NSObjectProtocol] = []
 
     override init() {
@@ -104,12 +106,7 @@ final class RcmdApp: NSObject, NSApplicationDelegate {
         installWorkspaceObservers()
         menuBarController?.refresh()
 
-        permissionTimer = Timer.scheduledTimer(withTimeInterval: 2.0, repeats: true) { [weak self] _ in
-            Task { @MainActor in
-                self?.refreshAccessibilityAndStartMonitorIfReady()
-                self?.refreshWindows()
-            }
-        }
+        startPermissionTimerIfNeeded()
 
         if !appState.accessibilityTrusted {
             showSettings()
@@ -119,6 +116,8 @@ final class RcmdApp: NSObject, NSApplicationDelegate {
     func applicationWillTerminate(_ notification: Notification) {
         stopEventTap()
         permissionTimer?.invalidate()
+        windowRefreshGeneration += 1
+        appStateRefreshGeneration += 1
         workspaceObservers.forEach { observer in
             NSWorkspace.shared.notificationCenter.removeObserver(observer)
         }
@@ -133,10 +132,27 @@ final class RcmdApp: NSObject, NSApplicationDelegate {
         let wasTrusted = appState.accessibilityTrusted
         appState.refreshAccessibilityStatus()
 
+        if appState.accessibilityTrusted {
+            permissionTimer?.invalidate()
+            permissionTimer = nil
+        }
+
         if appState.accessibilityTrusted, !eventTapController.isRunning {
             startEventTap()
         } else if !wasTrusted || wasTrusted != appState.accessibilityTrusted {
             menuBarController?.refresh()
+        }
+    }
+
+    private func startPermissionTimerIfNeeded() {
+        guard permissionTimer == nil, !appState.accessibilityTrusted else {
+            return
+        }
+
+        permissionTimer = Timer.scheduledTimer(withTimeInterval: 2.0, repeats: true) { [weak self] _ in
+            Task { @MainActor in
+                self?.refreshAccessibilityAndStartMonitorIfReady()
+            }
         }
     }
 
@@ -182,23 +198,48 @@ final class RcmdApp: NSObject, NSApplicationDelegate {
             eventTapController.isWindowSearchActive = false
             osdWindowController?.hideImmediately()
 
+            var shouldRefreshAssignments = false
+            var shouldRefreshAppCatalog = false
+            var shouldRefreshWindows = false
+
             switch shortcut.kind {
             case .activate:
                 let result = await appRegistry.focusOrLaunchAssignedApp(for: shortcut.letter)
                 appState.record(shortcut: shortcut, result: result)
+                switch result {
+                case .launched:
+                    shouldRefreshAssignments = true
+                    shouldRefreshAppCatalog = true
+                    shouldRefreshWindows = true
+                case .focused, .minimized:
+                    shouldRefreshWindows = true
+                case .unassigned, .failed:
+                    break
+                }
             case .assign:
                 let result = appRegistry.assignFrontmostApp(to: shortcut.letter)
                 appState.record(shortcut: shortcut, assignmentResult: result)
+                shouldRefreshAssignments = true
             case .cycleWindow:
                 let result = await windowRegistry.focusNextWindow()
                 appState.record(shortcut: shortcut, windowFocusResult: result)
+                shouldRefreshWindows = true
             case .openWindowSearch:
                 break
             }
 
-            refreshAssignments()
-            refreshAppCatalog()
-            refreshWindows()
+            if shouldRefreshAssignments {
+                refreshAssignments()
+            }
+
+            if shouldRefreshAppCatalog {
+                refreshAppCatalog()
+            }
+
+            if shouldRefreshWindows {
+                scheduleWindowRefresh()
+            }
+
             menuBarController?.refresh()
         }
     }
@@ -230,7 +271,6 @@ final class RcmdApp: NSObject, NSApplicationDelegate {
                 }
 
                 self.refreshAssignments()
-                self.refreshWindows()
                 self.appState.showAssignmentOSD()
                 self.osdWindowController?.show()
                 self.pendingOSDShowWorkItem = nil
@@ -255,6 +295,7 @@ final class RcmdApp: NSObject, NSApplicationDelegate {
             appState.recordWindowSearchOpened()
             appState.showWindowSearchOSD()
             eventTapController.isWindowSearchActive = true
+            refreshWindows()
             updateWindowSearchSelection()
             osdWindowController?.activateSearchIfNeeded()
         }
@@ -345,7 +386,7 @@ final class RcmdApp: NSObject, NSApplicationDelegate {
             eventTapController.isWindowSearchActive = false
             let result = await windowRegistry.focus(window: window)
             appState.recordWindowSearchFocusResult(result)
-            refreshWindows()
+            scheduleWindowRefresh()
         }
     }
 
@@ -429,26 +470,81 @@ final class RcmdApp: NSObject, NSApplicationDelegate {
         focus(window: window)
     }
 
+    private func scheduleWindowRefresh(after delay: TimeInterval = 0.15) {
+        windowRefreshGeneration += 1
+        let generation = windowRefreshGeneration
+
+        DispatchQueue.main.asyncAfter(deadline: .now() + delay) { [weak self] in
+            Task { @MainActor in
+                guard let self, self.windowRefreshGeneration == generation else {
+                    return
+                }
+
+                self.refreshWindows()
+            }
+        }
+    }
+
+    private func scheduleAppStateRefresh(
+        after delay: TimeInterval = 0.25,
+        invalidateInstalledApplications: Bool = false
+    ) {
+        appStateRefreshGeneration += 1
+        let generation = appStateRefreshGeneration
+
+        DispatchQueue.main.asyncAfter(deadline: .now() + delay) { [weak self] in
+            Task { @MainActor in
+                guard let self, self.appStateRefreshGeneration == generation else {
+                    return
+                }
+
+                if invalidateInstalledApplications {
+                    self.appRegistry.invalidateInstalledApplicationsCache()
+                }
+
+                self.refreshAssignments()
+                self.refreshAppCatalog()
+                self.refreshWindows()
+                self.menuBarController?.refresh()
+            }
+        }
+    }
+
     private func installWorkspaceObservers() {
         let notificationCenter = NSWorkspace.shared.notificationCenter
-        let notifications: [NSNotification.Name] = [
+        let lifecycleNotifications: [NSNotification.Name] = [
             NSWorkspace.didLaunchApplicationNotification,
-            NSWorkspace.didTerminateApplicationNotification,
-            NSWorkspace.didActivateApplicationNotification
+            NSWorkspace.didTerminateApplicationNotification
         ]
 
-        workspaceObservers = notifications.map { notificationName in
+        var observers = lifecycleNotifications.map { notificationName in
             notificationCenter.addObserver(
                 forName: notificationName,
                 object: nil,
                 queue: .main
             ) { [weak self] _ in
                 Task { @MainActor in
-                    self?.refreshAssignments()
-                    self?.refreshAppCatalog()
-                    self?.refreshWindows()
+                    self?.scheduleAppStateRefresh(invalidateInstalledApplications: true)
                 }
             }
         }
+
+        observers.append(
+            notificationCenter.addObserver(
+                forName: NSWorkspace.didActivateApplicationNotification,
+                object: nil,
+                queue: .main
+            ) { [weak self] _ in
+                Task { @MainActor in
+                    guard self?.appState.osdMode == .windowSearch else {
+                        return
+                    }
+
+                    self?.scheduleWindowRefresh(after: 0.25)
+                }
+            }
+        )
+
+        workspaceObservers = observers
     }
 }

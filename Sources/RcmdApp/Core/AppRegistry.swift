@@ -104,6 +104,9 @@ enum ManualAssignmentRemovalResult: Sendable, Equatable {
 final class AppRegistry {
     private let workspace: NSWorkspace
     private let assignmentStore: AssignmentStore
+    private var installedApplicationsCache: [InstalledApplication]?
+    private var installedApplicationsCacheDate: Date?
+    private let installedApplicationsCacheLifetime: TimeInterval = 120
 
     init(workspace: NSWorkspace = .shared, assignmentStore: AssignmentStore) {
         self.workspace = workspace
@@ -114,6 +117,7 @@ final class AppRegistry {
         var assignedLetters = Set<Character>()
         var assignedBundleIdentifiers = Set<String>()
         var assignments: [AppAssignment] = []
+        let runningBundleIdentifiers = runningBundleIdentifiers()
 
         addManualAssignments(
             to: &assignments,
@@ -128,7 +132,8 @@ final class AppRegistry {
         addInstalledAssignments(
             to: &assignments,
             assignedLetters: &assignedLetters,
-            assignedBundleIdentifiers: &assignedBundleIdentifiers
+            assignedBundleIdentifiers: &assignedBundleIdentifiers,
+            runningBundleIdentifiers: runningBundleIdentifiers
         )
 
         return assignments.sorted { lhs, rhs in
@@ -137,14 +142,21 @@ final class AppRegistry {
     }
 
     func appCatalog() -> [AppCatalogEntry] {
-        installedApplications().map { app in
+        let runningBundleIdentifiers = runningBundleIdentifiers()
+
+        return installedApplications().map { app in
             AppCatalogEntry(
                 appName: app.appName,
                 bundleIdentifier: app.bundleIdentifier,
                 appURL: app.appURL,
-                isRunning: isRunning(bundleIdentifier: app.bundleIdentifier)
+                isRunning: runningBundleIdentifiers.contains(app.bundleIdentifier)
             )
         }
+    }
+
+    func invalidateInstalledApplicationsCache() {
+        installedApplicationsCache = nil
+        installedApplicationsCacheDate = nil
     }
 
     func focusOrLaunchAssignedApp(for letter: Character) async -> AppActivationResult {
@@ -289,7 +301,8 @@ final class AppRegistry {
     private func addInstalledAssignments(
         to assignments: inout [AppAssignment],
         assignedLetters: inout Set<Character>,
-        assignedBundleIdentifiers: inout Set<String>
+        assignedBundleIdentifiers: inout Set<String>,
+        runningBundleIdentifiers: Set<String>
     ) {
         for app in installedApplications() {
             guard
@@ -308,7 +321,7 @@ final class AppRegistry {
                     appName: app.appName,
                     bundleIdentifier: app.bundleIdentifier,
                     appURL: app.appURL,
-                    isRunning: isRunning(bundleIdentifier: app.bundleIdentifier),
+                    isRunning: runningBundleIdentifiers.contains(app.bundleIdentifier),
                     isManual: false
                 )
             )
@@ -328,6 +341,12 @@ final class AppRegistry {
     }
 
     private func installedApplications() -> [InstalledApplication] {
+        if let installedApplicationsCache,
+           let installedApplicationsCacheDate,
+           Date().timeIntervalSince(installedApplicationsCacheDate) < installedApplicationsCacheLifetime {
+            return installedApplicationsCache
+        }
+
         var appsByBundleID: [String: InstalledApplication] = [:]
 
         for directory in applicationSearchDirectories() {
@@ -356,9 +375,12 @@ final class AppRegistry {
             }
         }
 
-        return appsByBundleID.values.sorted { lhs, rhs in
+        let apps = appsByBundleID.values.sorted { lhs, rhs in
             lhs.appName.localizedCaseInsensitiveCompare(rhs.appName) == .orderedAscending
         }
+        installedApplicationsCache = apps
+        installedApplicationsCacheDate = Date()
+        return apps
     }
 
     private func assignment(
@@ -443,10 +465,8 @@ final class AppRegistry {
         return name.isEmpty ? nil : name
     }
 
-    private func isRunning(bundleIdentifier: String) -> Bool {
-        workspace.runningApplications.contains { app in
-            app.bundleIdentifier == bundleIdentifier
-        }
+    private func runningBundleIdentifiers() -> Set<String> {
+        Set(workspace.runningApplications.compactMap(\.bundleIdentifier))
     }
 
     private func restoreMinimizedWindows(for app: NSRunningApplication) {
