@@ -9,11 +9,11 @@ enum EventTapError: LocalizedError {
     var errorDescription: String? {
         switch self {
         case .accessibilityPermissionMissing:
-            "Accessibility permission is required."
+            L10n.tr("error.accessibilityPermissionRequired")
         case .couldNotCreateEventTap:
-            "Could not create keyboard event tap."
+            L10n.tr("error.couldNotCreateEventTap")
         case .couldNotCreateRunLoopSource:
-            "Could not create event tap run loop source."
+            L10n.tr("error.couldNotCreateRunLoopSource")
         }
     }
 }

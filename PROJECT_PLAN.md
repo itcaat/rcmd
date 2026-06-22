@@ -29,6 +29,8 @@ Done:
 - Quick Start first-run window exists for Accessibility setup and core
   shortcut hints; debug builds show it after every launch for repeated
   onboarding testing.
+- Localized UI resources exist for English, Russian, German, Spanish, French,
+  and Italian, with English configured as the SwiftPM fallback localization.
 - Accessibility permission status and request helper exist.
 - Active `CGEventTap` exists for key event logging and handled shortcut
   suppression.

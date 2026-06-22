@@ -15,13 +15,13 @@ enum LaunchAtLoginResult: Sendable, Equatable {
     var displayMessage: String {
         switch self {
         case .enabled:
-            "Launch at Login enabled."
+            L10n.tr("launchAtLogin.enabledMessage")
         case .disabled:
-            "Launch at Login disabled."
+            L10n.tr("launchAtLogin.disabledMessage")
         case .requiresApproval:
-            "Launch at Login requires approval in System Settings."
+            L10n.tr("launchAtLogin.requiresApprovalMessage")
         case .failed(let message):
-            "Launch at Login failed: \(message)"
+            L10n.tr("launchAtLogin.failedMessage", message)
         }
     }
 }
@@ -31,15 +31,15 @@ final class LaunchAtLoginController {
     func currentState() -> LaunchAtLoginState {
         switch SMAppService.mainApp.status {
         case .enabled:
-            LaunchAtLoginState(isEnabled: true, statusText: "Enabled")
+            LaunchAtLoginState(isEnabled: true, statusText: L10n.tr("state.enabled"))
         case .requiresApproval:
-            LaunchAtLoginState(isEnabled: false, statusText: "Requires approval")
+            LaunchAtLoginState(isEnabled: false, statusText: L10n.tr("state.requiresApproval"))
         case .notRegistered:
-            LaunchAtLoginState(isEnabled: false, statusText: "Disabled")
+            LaunchAtLoginState(isEnabled: false, statusText: L10n.tr("state.disabled"))
         case .notFound:
-            LaunchAtLoginState(isEnabled: false, statusText: "Unavailable")
+            LaunchAtLoginState(isEnabled: false, statusText: L10n.tr("state.unavailable"))
         @unknown default:
-            LaunchAtLoginState(isEnabled: false, statusText: "Unknown")
+            LaunchAtLoginState(isEnabled: false, statusText: L10n.tr("state.unknown"))
         }
     }
 

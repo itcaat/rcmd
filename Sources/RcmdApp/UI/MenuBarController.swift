@@ -24,7 +24,7 @@ final class MenuBarController {
             button.title = ""
             button.image = MenuBarIcon.make()
             button.imagePosition = .imageOnly
-            button.toolTip = "rcmd"
+            button.toolTip = L10n.tr("app.name")
         }
 
         refresh()
@@ -33,43 +33,43 @@ final class MenuBarController {
     func refresh() {
         let menu = NSMenu()
 
-        let titleItem = NSMenuItem(title: "rcmd bootstrap", action: nil, keyEquivalent: "")
+        let titleItem = NSMenuItem(title: L10n.tr("menu.title"), action: nil, keyEquivalent: "")
         titleItem.isEnabled = false
         menu.addItem(titleItem)
 
         menu.addItem(NSMenuItem.separator())
 
         let permissionTitle = appState.accessibilityTrusted
-            ? "Accessibility: Granted"
-            : "Accessibility: Missing"
+            ? L10n.tr("menu.accessibilityGranted")
+            : L10n.tr("menu.accessibilityMissing")
         let permissionItem = NSMenuItem(title: permissionTitle, action: nil, keyEquivalent: "")
         permissionItem.isEnabled = false
         menu.addItem(permissionItem)
 
         let tapTitle = appState.eventTapRunning
-            ? "Keyboard monitor: Running"
-            : "Keyboard monitor: Stopped"
+            ? L10n.tr("menu.keyboardMonitorRunning")
+            : L10n.tr("menu.keyboardMonitorStopped")
         let tapItem = NSMenuItem(title: tapTitle, action: nil, keyEquivalent: "")
         tapItem.isEnabled = false
         menu.addItem(tapItem)
 
         menu.addItem(NSMenuItem.separator())
 
-        menu.addItem(menuItem(title: "Settings...", action: #selector(openSettings)))
-        menu.addItem(menuItem(title: "Quick Start...", action: #selector(openQuickStart)))
+        menu.addItem(menuItem(title: L10n.tr("menu.settings"), action: #selector(openSettings)))
+        menu.addItem(menuItem(title: L10n.tr("menu.quickStart"), action: #selector(openQuickStart)))
 
         if !appState.accessibilityTrusted {
-            menu.addItem(menuItem(title: "Request Accessibility Permission", action: #selector(requestAccessibilityPermission)))
+            menu.addItem(menuItem(title: L10n.tr("menu.requestAccessibility"), action: #selector(requestAccessibilityPermission)))
         }
 
         if appState.eventTapRunning {
-            menu.addItem(menuItem(title: "Stop Keyboard Monitor", action: #selector(stopEventTap)))
+            menu.addItem(menuItem(title: L10n.tr("menu.stopKeyboardMonitor"), action: #selector(stopEventTap)))
         } else {
-            menu.addItem(menuItem(title: "Start Keyboard Monitor", action: #selector(startEventTap)))
+            menu.addItem(menuItem(title: L10n.tr("menu.startKeyboardMonitor"), action: #selector(startEventTap)))
         }
 
         menu.addItem(NSMenuItem.separator())
-        menu.addItem(menuItem(title: "Quit", action: #selector(quit), keyEquivalent: "q"))
+        menu.addItem(menuItem(title: L10n.tr("menu.quit"), action: #selector(quit), keyEquivalent: "q"))
 
         statusItem.menu = menu
     }

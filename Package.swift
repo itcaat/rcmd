@@ -4,6 +4,7 @@ import PackageDescription
 
 let package = Package(
     name: "rcmd",
+    defaultLocalization: "en",
     platforms: [
         .macOS(.v14)
     ],
@@ -14,6 +15,9 @@ let package = Package(
         .executableTarget(
             name: "RcmdApp",
             path: "Sources/RcmdApp",
+            resources: [
+                .process("Resources")
+            ],
             swiftSettings: [
                 .define("DEBUG", .when(configuration: .debug))
             ]

@@ -24,7 +24,7 @@ final class SettingsWindowController {
         if window == nil {
             let hostingController = NSHostingController(rootView: SettingsView(appState: appState, actions: actions))
             let newWindow = NSWindow(contentViewController: hostingController)
-            newWindow.title = "rcmd Settings"
+            newWindow.title = L10n.tr("settings.windowTitle")
             newWindow.styleMask = [.titled, .closable, .miniaturizable, .resizable]
             newWindow.setContentSize(NSSize(width: 860, height: 600))
             newWindow.minSize = NSSize(width: 780, height: 520)

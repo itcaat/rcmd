@@ -9,19 +9,19 @@ enum OSDMode: Sendable, Equatable {
 final class AppStateModel: ObservableObject {
     @Published var accessibilityTrusted = false
     @Published var eventTapRunning = false
-    @Published var statusMessage = "Starting rcmd bootstrap."
+    @Published var statusMessage = L10n.tr("status.starting")
     @Published private(set) var recentEvents: [String] = []
     @Published private(set) var assignments: [AppAssignment] = []
     @Published private(set) var appCatalog: [AppCatalogEntry] = []
     @Published private(set) var keyMappingMode: KeyMappingMode = .activeLayout
     @Published private(set) var minimizeActiveWindowOnRepeatedShortcut = false
     @Published private(set) var launchAtLoginEnabled = false
-    @Published private(set) var launchAtLoginStatus = "Unknown"
+    @Published private(set) var launchAtLoginStatus = L10n.tr("state.unknown")
     @Published private(set) var windows: [WindowInfo] = []
     @Published private(set) var osdMode: OSDMode = .assignments
     @Published private(set) var windowSearchQuery = ""
     @Published private(set) var selectedWindowID: WindowInfo.ID?
-    @Published private(set) var lastShortcutMessage = "No shortcut handled yet."
+    @Published private(set) var lastShortcutMessage = L10n.tr("status.noShortcut")
 
     func refreshAccessibilityStatus() {
         accessibilityTrusted = AccessibilityPermission.isTrusted
@@ -119,14 +119,14 @@ final class AppStateModel: ObservableObject {
     }
 
     func recordWindowSearchOpened() {
-        lastShortcutMessage = "right-cmd+space: Window search opened."
+        lastShortcutMessage = L10n.tr("status.windowSearchOpened")
         statusMessage = lastShortcutMessage
 
         AppLog.hotkeys.info("\(self.lastShortcutMessage, privacy: .public)")
     }
 
     func recordWindowSearchFocusResult(_ result: WindowFocusResult) {
-        lastShortcutMessage = "window search: \(result.displayMessage)"
+        lastShortcutMessage = L10n.tr("status.windowSearchResult", result.displayMessage)
         statusMessage = lastShortcutMessage
 
         AppLog.hotkeys.info("\(self.lastShortcutMessage, privacy: .public)")
@@ -147,14 +147,16 @@ final class AppStateModel: ObservableObject {
     }
 
     func recordKeyMappingModeChange(_ mode: KeyMappingMode) {
-        lastShortcutMessage = "Key mapping mode set to \(mode.displayName)."
+        lastShortcutMessage = L10n.tr("status.keyMappingChanged", mode.displayName)
         statusMessage = lastShortcutMessage
 
         AppLog.app.info("\(self.lastShortcutMessage, privacy: .public)")
     }
 
     func recordMinimizeActiveWindowOnRepeatedShortcutChange(_ enabled: Bool) {
-        lastShortcutMessage = "Repeated app shortcut minimize is \(enabled ? "enabled" : "disabled")."
+        lastShortcutMessage = enabled
+            ? L10n.tr("status.repeatedShortcutMinimizeEnabled")
+            : L10n.tr("status.repeatedShortcutMinimizeDisabled")
         statusMessage = lastShortcutMessage
 
         AppLog.app.info("\(self.lastShortcutMessage, privacy: .public)")

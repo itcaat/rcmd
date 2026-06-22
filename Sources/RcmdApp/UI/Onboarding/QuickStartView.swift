@@ -13,14 +13,14 @@ struct QuickStartView: View {
                 shortcutStep(
                     number: "2",
                     systemImage: "command.square",
-                    title: "Hold Right Command",
-                    subtitle: "The overlay shows app letters while the key is held."
+                    title: L10n.tr("quickStart.holdRightCommandTitle"),
+                    subtitle: L10n.tr("quickStart.holdRightCommandSubtitle")
                 )
                 shortcutStep(
                     number: "3",
                     systemImage: "keyboard",
-                    title: "Use the three core shortcuts",
-                    subtitle: "Right Command + letter switches apps. Space searches windows. Tab cycles windows."
+                    title: L10n.tr("quickStart.coreShortcutsTitle"),
+                    subtitle: L10n.tr("quickStart.coreShortcutsSubtitle")
                 )
             }
 
@@ -40,10 +40,10 @@ struct QuickStartView: View {
                 .foregroundStyle(.white, Color.accentColor)
 
             VStack(alignment: .leading, spacing: 4) {
-                Text("Quick Start")
+                Text(L10n.tr("quickStart.title"))
                     .font(.largeTitle.weight(.semibold))
 
-                Text("Set up rcmd and learn the shortcuts you need first.")
+                Text(L10n.tr("quickStart.subtitle"))
                     .font(.callout)
                     .foregroundStyle(.secondary)
             }
@@ -57,10 +57,10 @@ struct QuickStartView: View {
             rowIcon("figure.wave")
 
             VStack(alignment: .leading, spacing: 3) {
-                Text("Grant Accessibility")
+                Text(L10n.tr("quickStart.grantAccessibilityTitle"))
                     .font(.headline)
 
-                Text(appState.accessibilityTrusted ? "Global shortcuts and window focusing are available." : "Required for global shortcuts and window search.")
+                Text(appState.accessibilityTrusted ? L10n.tr("quickStart.permissionGrantedSubtitle") : L10n.tr("quickStart.permissionMissingSubtitle"))
                     .font(.callout)
                     .foregroundStyle(.secondary)
                     .lineLimit(2)
@@ -69,12 +69,12 @@ struct QuickStartView: View {
             Spacer(minLength: 16)
 
             if appState.accessibilityTrusted {
-                statusPill("Granted", color: .green)
+                statusPill(L10n.tr("state.granted"), color: .green)
             } else {
                 Button {
                     actions.requestAccessibilityPermission()
                 } label: {
-                    Label("Grant Permission", systemImage: "lock.open")
+                    Label(L10n.tr("quickStart.grantPermission"), systemImage: "lock.open")
                 }
                 .buttonStyle(.borderedProminent)
             }
@@ -118,13 +118,13 @@ struct QuickStartView: View {
             Button {
                 actions.openSettings()
             } label: {
-                Label("Settings", systemImage: "gearshape")
+                Label(L10n.tr("settings.title"), systemImage: "gearshape")
             }
 
             Button {
                 actions.dismiss()
             } label: {
-                Text("Got it")
+                Text(L10n.tr("quickStart.gotIt"))
                     .frame(minWidth: 62)
             }
             .buttonStyle(.borderedProminent)

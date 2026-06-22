@@ -23,6 +23,8 @@ left Command shortcuts alone.
 - Create manual assignments with **Right Command + Right Option + letter**.
 - Use the Quick Start window for first-run permission setup and core shortcut
   hints.
+- Use localized UI strings for English, Russian, German, Spanish, French, and
+  Italian, with English as the fallback.
 - Edit assignments, key mapping, Launch at Login, and diagnostics in Settings.
 - Optionally minimize the active window when its app shortcut is pressed again.
 - Persist config in readable YAML at `~/.config/rcmd/config.yaml`.
@@ -107,6 +109,12 @@ Key mapping modes:
   layout.
 - **Active layout** uses the active Latin macOS keyboard layout, with physical
   QWERTY fallback for non-Latin layouts.
+
+## Languages
+
+The app follows the user's macOS language preferences automatically. Current
+localizations are English, Russian, German, Spanish, French, and Italian. If
+the preferred system language is not available, the app falls back to English.
 
 ## Config
 

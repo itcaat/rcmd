@@ -26,7 +26,7 @@ final class WindowRegistry {
     @MainActor
     func focusNextWindow() async -> WindowFocusResult {
         guard AccessibilityPermission.isTrusted else {
-            return .failed("Accessibility permission is required.")
+            return .failed(L10n.tr("error.accessibilityPermissionRequired"))
         }
 
         let appSnapshots = workspace.runningApplications.compactMap(WindowAppSnapshot.init(app:))
@@ -50,7 +50,7 @@ final class WindowRegistry {
     @MainActor
     func focus(window: WindowInfo) async -> WindowFocusResult {
         guard AccessibilityPermission.isTrusted else {
-            return .failed("Accessibility permission is required.")
+            return .failed(L10n.tr("error.accessibilityPermissionRequired"))
         }
 
         let appSnapshots = workspace.runningApplications.compactMap(WindowAppSnapshot.init(app:))
@@ -108,7 +108,7 @@ final class WindowRegistry {
         let records = apps.flatMap(windowRecords(for:))
 
         guard let selectedRecord = matchingRecord(for: targetWindow, in: records) else {
-            return .failed("Window is no longer readable.")
+            return .failed(L10n.tr("error.windowNoLongerReadable"))
         }
 
         focus(record: selectedRecord)

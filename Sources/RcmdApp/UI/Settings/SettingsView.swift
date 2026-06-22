@@ -12,11 +12,11 @@ struct SettingsView: View {
 
         var title: String {
             switch self {
-            case .overview: "Overview"
-            case .shortcuts: "Shortcuts"
-            case .assignments: "Assignments"
-            case .windows: "Windows"
-            case .diagnostics: "Diagnostics"
+            case .overview: L10n.tr("settings.pane.overview")
+            case .shortcuts: L10n.tr("settings.pane.shortcuts")
+            case .assignments: L10n.tr("settings.pane.assignments")
+            case .windows: L10n.tr("settings.pane.windows")
+            case .diagnostics: L10n.tr("settings.pane.diagnostics")
             }
         }
 
@@ -67,7 +67,7 @@ struct SettingsView: View {
                         .font(.title3.weight(.semibold))
                 }
 
-                Text("Keyboard control")
+                Text(L10n.tr("settings.keyboardControl"))
                     .font(.caption)
                     .foregroundStyle(.secondary)
             }
@@ -84,15 +84,15 @@ struct SettingsView: View {
 
             VStack(alignment: .leading, spacing: 8) {
                 statusDotRow(
-                    title: "Accessibility",
+                    title: L10n.tr("settings.accessibility"),
                     isGood: appState.accessibilityTrusted,
-                    value: appState.accessibilityTrusted ? "Granted" : "Missing"
+                    value: appState.accessibilityTrusted ? L10n.tr("state.granted") : L10n.tr("state.missing")
                 )
 
                 statusDotRow(
-                    title: "Monitor",
+                    title: L10n.tr("settings.monitor"),
                     isGood: appState.eventTapRunning,
-                    value: appState.eventTapRunning ? "Running" : "Stopped"
+                    value: appState.eventTapRunning ? L10n.tr("state.runningCapitalized") : L10n.tr("state.stopped")
                 )
             }
             .padding(.horizontal, 14)
@@ -173,38 +173,38 @@ struct SettingsView: View {
     private var paneSubtitle: String {
         switch selectedPane {
         case .overview:
-            "Permission, startup, and active keyboard monitor state."
+            L10n.tr("settings.subtitle.overview")
         case .shortcuts:
-            "Trigger behavior and keyboard layout mapping."
+            L10n.tr("settings.subtitle.shortcuts")
         case .assignments:
-            "Manual and dynamic app bindings used by right Command."
+            L10n.tr("settings.subtitle.assignments")
         case .windows:
-            "Readable windows exposed through Accessibility."
+            L10n.tr("settings.subtitle.windows")
         case .diagnostics:
-            "Recent events and internal status for debugging."
+            L10n.tr("settings.subtitle.diagnostics")
         }
     }
 
     private var overviewPane: some View {
         VStack(alignment: .leading, spacing: 14) {
-            settingsGroup("System access") {
+            settingsGroup(L10n.tr("settings.group.systemAccess")) {
                 VStack(spacing: 0) {
                     accessibilityRow
                     separator
                     settingsRow(
                         systemImage: "keyboard.badge.eye",
-                        title: "Keyboard monitor",
+                        title: L10n.tr("settings.keyboardMonitor"),
                         subtitle: appState.statusMessage,
-                        value: appState.eventTapRunning ? "Running" : "Stopped",
+                        value: appState.eventTapRunning ? L10n.tr("state.runningCapitalized") : L10n.tr("state.stopped"),
                         valueColor: appState.eventTapRunning ? .green : .orange
                     )
                 }
             }
 
-            settingsGroup("Startup") {
+            settingsGroup(L10n.tr("settings.group.startup")) {
                 VStack(alignment: .leading, spacing: 10) {
                     Toggle(
-                        "Launch at Login",
+                        L10n.tr("settings.launchAtLogin"),
                         isOn: Binding(
                             get: { appState.launchAtLoginEnabled },
                             set: { enabled in actions.setLaunchAtLogin(enabled) }
@@ -217,11 +217,11 @@ struct SettingsView: View {
                 }
             }
 
-            settingsGroup("Snapshot") {
+            settingsGroup(L10n.tr("settings.group.snapshot")) {
                 LazyVGrid(columns: [GridItem(.adaptive(minimum: 128), spacing: 10)], spacing: 10) {
-                    metricTile(title: "Assignments", value: "\(appState.assignments.count)", systemImage: "square.grid.2x2")
-                    metricTile(title: "Apps", value: "\(appState.appCatalog.count)", systemImage: "app.dashed")
-                    metricTile(title: "Windows", value: "\(appState.windows.count)", systemImage: "macwindow")
+                    metricTile(title: L10n.tr("settings.metric.assignments"), value: "\(appState.assignments.count)", systemImage: "square.grid.2x2")
+                    metricTile(title: L10n.tr("settings.metric.apps"), value: "\(appState.appCatalog.count)", systemImage: "app.dashed")
+                    metricTile(title: L10n.tr("settings.metric.windows"), value: "\(appState.windows.count)", systemImage: "macwindow")
                 }
             }
         }
@@ -232,10 +232,10 @@ struct SettingsView: View {
             rowIcon("figure.wave")
 
             VStack(alignment: .leading, spacing: 2) {
-                Text("Accessibility")
+                Text(L10n.tr("settings.accessibility"))
                     .font(.callout.weight(.medium))
 
-                Text(appState.accessibilityTrusted ? "Window focus and global shortcuts are available." : "Required for global shortcuts and window metadata.")
+                Text(appState.accessibilityTrusted ? L10n.tr("settings.accessibilityGrantedSubtitle") : L10n.tr("settings.accessibilityMissingSubtitle"))
                     .font(.caption)
                     .foregroundStyle(.secondary)
                     .lineLimit(2)
@@ -244,13 +244,13 @@ struct SettingsView: View {
             Spacer(minLength: 16)
 
             if appState.accessibilityTrusted {
-                statusPill("Granted", color: .green)
+                statusPill(L10n.tr("state.granted"), color: .green)
             } else {
                 Button {
                     AccessibilityPermission.request()
                     appState.refreshAccessibilityStatus()
                 } label: {
-                    Label("Missing", systemImage: "exclamationmark.triangle.fill")
+                    Label(L10n.tr("state.missing"), systemImage: "exclamationmark.triangle.fill")
                 }
                 .buttonStyle(.borderedProminent)
                 .controlSize(.small)
@@ -261,39 +261,39 @@ struct SettingsView: View {
 
     private var shortcutsPane: some View {
         VStack(alignment: .leading, spacing: 14) {
-            settingsGroup("Shortcuts") {
+            settingsGroup(L10n.tr("settings.group.shortcuts")) {
                 VStack(spacing: 0) {
-                    shortcutRow(keys: "Right Cmd + Letter", title: "Focus or launch assigned app")
+                    shortcutRow(keys: "Right Cmd + Letter", title: L10n.tr("settings.shortcut.focusOrLaunch"))
                     separator
-                    shortcutRow(keys: "Right Cmd + Space", title: "Search open windows")
+                    shortcutRow(keys: "Right Cmd + Space", title: L10n.tr("settings.shortcut.searchWindows"))
                     separator
-                    shortcutRow(keys: "Right Cmd + Tab", title: "Focus next readable window")
+                    shortcutRow(keys: "Right Cmd + Tab", title: L10n.tr("settings.shortcut.focusNextWindow"))
                     separator
-                    shortcutRow(keys: "Right Cmd + Right Option + Letter", title: "Assign frontmost app")
+                    shortcutRow(keys: "Right Cmd + Right Option + Letter", title: L10n.tr("settings.shortcut.assignFrontmost"))
                 }
             }
 
-            settingsGroup("Behavior") {
+            settingsGroup(L10n.tr("settings.group.behavior")) {
                 VStack(alignment: .leading, spacing: 8) {
                     Toggle(
-                        "Minimize active window on repeated app shortcut",
+                        L10n.tr("settings.minimizeRepeatedShortcut"),
                         isOn: Binding(
                             get: { appState.minimizeActiveWindowOnRepeatedShortcut },
                             set: { enabled in actions.setMinimizeActiveWindowOnRepeatedShortcut(enabled) }
                         )
                     )
 
-                    Text("When the target app is already active, pressing its Right Cmd shortcut again minimizes the focused window instead of refocusing the app.")
+                    Text(L10n.tr("settings.minimizeRepeatedShortcutDetail"))
                         .font(.caption)
                         .foregroundStyle(.secondary)
                         .fixedSize(horizontal: false, vertical: true)
                 }
             }
 
-            settingsGroup("Key mapping") {
+            settingsGroup(L10n.tr("settings.group.keyMapping")) {
                 VStack(alignment: .leading, spacing: 10) {
                     Picker(
-                        "Key mapping",
+                        L10n.tr("settings.keyMapping"),
                         selection: Binding(
                             get: { appState.keyMappingMode },
                             set: { mode in actions.setKeyMappingMode(mode) }
@@ -316,17 +316,17 @@ struct SettingsView: View {
 
     private var assignmentsPane: some View {
         VStack(alignment: .leading, spacing: 14) {
-            settingsGroup("Manual assignment") {
+            settingsGroup(L10n.tr("settings.group.manualAssignment")) {
                 VStack(alignment: .leading, spacing: 12) {
                     HStack(spacing: 10) {
-                        Picker("Letter", selection: $selectedLetter) {
+                        Picker(L10n.tr("settings.letter"), selection: $selectedLetter) {
                             ForEach(editableLetters, id: \.self) { letter in
                                 Text(String(letter).uppercased()).tag(letter)
                             }
                         }
                         .frame(width: 118)
 
-                        Picker("App", selection: $selectedBundleIdentifier) {
+                        Picker(L10n.tr("settings.app"), selection: $selectedBundleIdentifier) {
                             ForEach(appState.appCatalog) { app in
                                 Text(app.displayText).tag(app.bundleIdentifier)
                             }
@@ -340,7 +340,7 @@ struct SettingsView: View {
 
                             actions.assignApp(selectedBundleIdentifier, selectedLetter)
                         } label: {
-                            Label("Assign", systemImage: "plus.circle.fill")
+                            Label(L10n.tr("settings.assign"), systemImage: "plus.circle.fill")
                         }
                         .disabled(selectedBundleIdentifier.isEmpty)
                     }
@@ -352,9 +352,9 @@ struct SettingsView: View {
                 syncDefaultSelectedApp()
             }
 
-            settingsGroup("Current assignments") {
+            settingsGroup(L10n.tr("settings.group.currentAssignments")) {
                 if appState.assignments.isEmpty {
-                    emptyState("No regular apps found.", systemImage: "app.dashed")
+                    emptyState(L10n.tr("settings.empty.noRegularApps"), systemImage: "app.dashed")
                 } else {
                     LazyVGrid(columns: [GridItem(.adaptive(minimum: 210), spacing: 10)], alignment: .leading, spacing: 10) {
                         ForEach(appState.assignments) { assignment in
@@ -371,7 +371,7 @@ struct SettingsView: View {
 
         return VStack(alignment: .leading, spacing: 8) {
             if manualAssignments.isEmpty {
-                emptyState("No manual assignments.", systemImage: "pin.slash")
+                emptyState(L10n.tr("settings.empty.noManualAssignments"), systemImage: "pin.slash")
             } else {
                 ForEach(manualAssignments) { assignment in
                     assignmentSummaryRow(assignment, showRemove: true)
@@ -411,7 +411,7 @@ struct SettingsView: View {
                 }
                 .buttonStyle(.plain)
                 .foregroundStyle(.secondary)
-                .help("Remove assignment")
+                .help(L10n.tr("settings.removeAssignment"))
             }
         }
         .padding(.horizontal, 10)
@@ -421,21 +421,21 @@ struct SettingsView: View {
     }
 
     private var windowsPane: some View {
-        settingsGroup("Readable windows") {
+        settingsGroup(L10n.tr("settings.group.readableWindows")) {
             VStack(alignment: .leading, spacing: 10) {
                 HStack {
-                    Text("\(appState.windows.count) windows")
+                    Text(L10n.tr("settings.windowsCount", appState.windows.count))
                         .font(.headline)
 
                     Spacer()
 
-                    statusPill(appState.accessibilityTrusted ? "Live" : "Permission needed", color: appState.accessibilityTrusted ? .green : .orange)
+                    statusPill(appState.accessibilityTrusted ? L10n.tr("state.live") : L10n.tr("state.permissionNeeded"), color: appState.accessibilityTrusted ? .green : .orange)
                 }
 
                 if !appState.accessibilityTrusted {
-                    emptyState("Grant Accessibility to read window metadata.", systemImage: "figure.wave")
+                    emptyState(L10n.tr("settings.empty.grantAccessibilityForWindows"), systemImage: "figure.wave")
                 } else if appState.windows.isEmpty {
-                    emptyState("No readable windows found.", systemImage: "macwindow.badge.plus")
+                    emptyState(L10n.tr("settings.empty.noReadableWindows"), systemImage: "macwindow.badge.plus")
                 } else {
                     VStack(alignment: .leading, spacing: 8) {
                         ForEach(appState.windows.prefix(24)) { window in
@@ -471,7 +471,7 @@ struct SettingsView: View {
 
     private var diagnosticsPane: some View {
         VStack(alignment: .leading, spacing: 14) {
-            settingsGroup("Status") {
+            settingsGroup(L10n.tr("settings.group.status")) {
                 VStack(alignment: .leading, spacing: 8) {
                     Text(appState.statusMessage)
                         .font(.callout)
@@ -484,9 +484,9 @@ struct SettingsView: View {
                 }
             }
 
-            settingsGroup("Recent key events") {
+            settingsGroup(L10n.tr("settings.group.recentKeyEvents")) {
                 if appState.recentEvents.isEmpty {
-                    emptyState("No events captured yet.", systemImage: "keyboard.badge.ellipsis")
+                    emptyState(L10n.tr("settings.empty.noEvents"), systemImage: "keyboard.badge.ellipsis")
                 } else {
                     VStack(alignment: .leading, spacing: 6) {
                         ForEach(appState.recentEvents, id: \.self) { event in
@@ -642,10 +642,10 @@ struct SettingsView: View {
     }
 
     private func assignmentDetailText(_ assignment: AppAssignment) -> String {
-        let state = assignment.isRunning ? "running" : "closed"
+        let state = assignment.isRunning ? L10n.tr("state.running") : L10n.tr("state.closed")
 
         if assignment.isManual {
-            return "\(state), manual"
+            return "\(state)\(L10n.tr("state.manualSuffix"))"
         }
 
         return state
@@ -660,9 +660,9 @@ struct SettingsView: View {
     private var keyMappingDetail: String {
         switch appState.keyMappingMode {
         case .activeLayout:
-            "Uses the active Latin macOS keyboard layout, with physical QWERTY fallback for non-Latin layouts."
+            L10n.tr("settings.keyMappingActiveLayoutDetail")
         case .physical:
-            "Uses physical QWERTY letter positions regardless of active keyboard layout."
+            L10n.tr("settings.keyMappingPhysicalDetail")
         }
     }
 }

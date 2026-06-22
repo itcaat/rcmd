@@ -202,11 +202,11 @@ final class RcmdApp: NSObject, NSApplicationDelegate {
         do {
             try eventTapController.start()
             appState.eventTapRunning = true
-            appState.statusMessage = "Keyboard monitor is running."
+            appState.statusMessage = L10n.tr("status.keyboardMonitorRunning")
             menuBarController?.refresh()
         } catch {
             appState.eventTapRunning = false
-            appState.statusMessage = "Keyboard monitor failed: \(error.localizedDescription)"
+            appState.statusMessage = L10n.tr("status.keyboardMonitorFailed", error.localizedDescription)
             AppLog.hotkeys.error("Failed to start event tap: \(error.localizedDescription, privacy: .public)")
             showSettings()
             menuBarController?.refresh()
@@ -218,7 +218,7 @@ final class RcmdApp: NSObject, NSApplicationDelegate {
         cancelPendingOSDShow()
         osdWindowController?.hide()
         appState.eventTapRunning = false
-        appState.statusMessage = "Keyboard monitor is stopped."
+        appState.statusMessage = L10n.tr("status.keyboardMonitorStopped")
         menuBarController?.refresh()
     }
 

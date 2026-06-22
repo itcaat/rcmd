@@ -11,9 +11,9 @@ enum KeyMappingMode: String, CaseIterable, Identifiable, Sendable {
     var displayName: String {
         switch self {
         case .activeLayout:
-            "Active layout"
+            L10n.tr("keyMapping.activeLayout")
         case .physical:
-            "Physical keys"
+            L10n.tr("keyMapping.physical")
         }
     }
 }

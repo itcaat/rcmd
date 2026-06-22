@@ -18,18 +18,18 @@ struct WindowInfo: Identifiable, Equatable, Sendable {
 
     var displayTitle: String {
         let trimmedTitle = title.trimmingCharacters(in: .whitespacesAndNewlines)
-        return trimmedTitle.isEmpty ? "(Untitled)" : trimmedTitle
+        return trimmedTitle.isEmpty ? L10n.tr("window.untitled") : trimmedTitle
     }
 
     var detailText: String {
         var parts: [String] = []
 
         if isFocused {
-            parts.append("focused")
+            parts.append(L10n.tr("window.focused"))
         }
 
         if isMinimized {
-            parts.append("minimized")
+            parts.append(L10n.tr("window.minimized"))
         }
 
         if let frame {
@@ -52,11 +52,11 @@ enum WindowFocusResult: Sendable, Equatable {
     var displayMessage: String {
         switch self {
         case .focused(let window):
-            "Focused \(window.appName): \(window.displayTitle)."
+            L10n.tr("windowFocus.focused", window.appName, window.displayTitle)
         case .noWindows:
-            "No readable windows found."
+            L10n.tr("windowFocus.noWindows")
         case .failed(let message):
-            "Window focus failed: \(message)"
+            L10n.tr("windowFocus.failed", message)
         }
     }
 }

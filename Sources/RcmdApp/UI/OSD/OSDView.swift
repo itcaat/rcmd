@@ -97,7 +97,7 @@ struct OSDView: View {
     private var assignmentContent: some View {
         VStack(alignment: .leading, spacing: 12) {
             if appState.assignments.isEmpty {
-                Text("No app assignments")
+                Text(L10n.tr("osd.noAppAssignments"))
                     .font(.callout)
                     .foregroundStyle(.secondary)
                     .frame(maxWidth: .infinity, alignment: .leading)
@@ -115,7 +115,7 @@ struct OSDView: View {
                 .scrollIndicators(.hidden)
 
                 if appState.assignments.count > 48 {
-                    Text("+\(appState.assignments.count - 48) more")
+                    Text(L10n.tr("osd.moreCount", appState.assignments.count - 48))
                         .font(.caption)
                         .foregroundStyle(.secondary)
                 }
@@ -142,9 +142,9 @@ struct OSDView: View {
     private var headerCountText: String {
         switch appState.osdMode {
         case .assignments:
-            "\(appState.assignments.count) apps"
+            L10n.tr("osd.appsCount", appState.assignments.count)
         case .windowSearch:
-            "\(searchWindows.count) windows"
+            L10n.tr("osd.windowsCount", searchWindows.count)
         }
     }
 
@@ -163,7 +163,7 @@ struct OSDView: View {
                     }
                 ),
                 isActive: appState.osdMode == .windowSearch,
-                placeholder: "Search windows",
+                placeholder: L10n.tr("osd.searchWindows"),
                 onMoveUp: {
                     moveSelection(by: -1)
                 },
@@ -208,9 +208,9 @@ struct OSDView: View {
     private var searchResults: some View {
         ZStack(alignment: .topLeading) {
             if !appState.accessibilityTrusted {
-                emptySearchText("Grant Accessibility to search windows.")
+                emptySearchText(L10n.tr("osd.grantAccessibilityToSearchWindows"))
             } else if filteredWindows.isEmpty {
-                emptySearchText(searchWindows.isEmpty ? "No readable windows." : "No matching windows.")
+                emptySearchText(searchWindows.isEmpty ? L10n.tr("osd.noReadableWindows") : L10n.tr("osd.noMatchingWindows"))
             } else {
                 ScrollViewReader { proxy in
                     ScrollView {
@@ -305,10 +305,10 @@ struct OSDView: View {
     }
 
     private func detailText(for assignment: AppAssignment) -> String {
-        let state = assignment.isRunning ? "running" : "closed"
+        let state = assignment.isRunning ? L10n.tr("state.running") : L10n.tr("state.closed")
 
         if assignment.isManual {
-            return "\(state), manual"
+            return "\(state)\(L10n.tr("state.manualSuffix"))"
         }
 
         return state

@@ -15,8 +15,8 @@ struct AppAssignment: Identifiable, Sendable, Equatable {
     }
 
     var displayText: String {
-        let state = isRunning ? "running" : "closed"
-        let source = isManual ? ", manual" : ""
+        let state = isRunning ? L10n.tr("state.running") : L10n.tr("state.closed")
+        let source = isManual ? L10n.tr("state.manualSuffix") : ""
         return "\(String(letter).uppercased()) -> \(appName) (\(state)\(source))"
     }
 }
@@ -32,7 +32,7 @@ struct AppCatalogEntry: Identifiable, Sendable, Equatable {
     }
 
     var displayText: String {
-        let state = isRunning ? "running" : "closed"
+        let state = isRunning ? L10n.tr("state.running") : L10n.tr("state.closed")
         return "\(appName) (\(state))"
     }
 }
@@ -56,15 +56,15 @@ enum AppActivationResult: Sendable, Equatable {
     var displayMessage: String {
         switch self {
         case .focused(let assignment):
-            "\(assignment.appName) focused."
+            L10n.tr("appActivation.focused", assignment.appName)
         case .minimized(let assignment):
-            "\(assignment.appName) active window minimized."
+            L10n.tr("appActivation.minimized", assignment.appName)
         case .launched(let assignment):
-            "\(assignment.appName) launched."
+            L10n.tr("appActivation.launched", assignment.appName)
         case .unassigned(let letter):
-            "No app assignment for \(String(letter).uppercased())."
+            L10n.tr("appActivation.unassigned", String(letter).uppercased())
         case .failed(let assignment, let message):
-            "\(assignment.appName) failed: \(message)"
+            L10n.tr("appActivation.failed", assignment.appName, message)
         }
     }
 }
@@ -77,11 +77,11 @@ enum ManualAssignmentResult: Sendable, Equatable {
     var displayMessage: String {
         switch self {
         case .assigned(let assignment):
-            "\(String(assignment.letter).uppercased()) assigned to \(assignment.appName)."
+            L10n.tr("manualAssignment.assigned", String(assignment.letter).uppercased(), assignment.appName)
         case .noActiveApp(let letter):
-            "No active regular app to assign to \(String(letter).uppercased())."
+            L10n.tr("manualAssignment.noActiveApp", String(letter).uppercased())
         case .failed(let letter, let message):
-            "Could not assign \(String(letter).uppercased()): \(message)"
+            L10n.tr("manualAssignment.failed", String(letter).uppercased(), message)
         }
     }
 }
@@ -93,9 +93,9 @@ enum ManualAssignmentRemovalResult: Sendable, Equatable {
     var displayMessage: String {
         switch self {
         case .removed(let letter):
-            "\(String(letter).uppercased()) manual assignment removed."
+            L10n.tr("manualAssignment.removed", String(letter).uppercased())
         case .notAssigned(let letter):
-            "\(String(letter).uppercased()) has no manual assignment."
+            L10n.tr("manualAssignment.notAssigned", String(letter).uppercased())
         }
     }
 }
@@ -490,7 +490,7 @@ final class AppRegistry {
 
     private func minimizeFocusedWindowIfVisible(for app: NSRunningApplication) -> ActiveWindowMinimizeResult {
         guard AccessibilityPermission.isTrusted, app.processIdentifier > 0 else {
-            return .failed("Accessibility permission is required")
+            return .failed(L10n.tr("error.accessibilityPermissionRequired"))
         }
 
         let appElement = AXUIElementCreateApplication(app.processIdentifier)
