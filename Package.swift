@@ -13,7 +13,10 @@ let package = Package(
     targets: [
         .executableTarget(
             name: "RcmdApp",
-            path: "Sources/RcmdApp"
+            path: "Sources/RcmdApp",
+            swiftSettings: [
+                .define("DEBUG", .when(configuration: .debug))
+            ]
         ),
         .testTarget(
             name: "RcmdAppTests",

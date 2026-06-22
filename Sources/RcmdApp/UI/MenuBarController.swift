@@ -2,6 +2,7 @@ import AppKit
 
 struct MenuBarActions {
     let openSettings: @MainActor () -> Void
+    let openQuickStart: @MainActor () -> Void
     let requestAccessibilityPermission: @MainActor () -> Void
     let startEventTap: @MainActor () -> Void
     let stopEventTap: @MainActor () -> Void
@@ -55,6 +56,7 @@ final class MenuBarController {
         menu.addItem(NSMenuItem.separator())
 
         menu.addItem(menuItem(title: "Settings...", action: #selector(openSettings)))
+        menu.addItem(menuItem(title: "Quick Start...", action: #selector(openQuickStart)))
 
         if !appState.accessibilityTrusted {
             menu.addItem(menuItem(title: "Request Accessibility Permission", action: #selector(requestAccessibilityPermission)))
@@ -80,6 +82,10 @@ final class MenuBarController {
 
     @objc private func openSettings() {
         actions.openSettings()
+    }
+
+    @objc private func openQuickStart() {
+        actions.openQuickStart()
     }
 
     @objc private func requestAccessibilityPermission() {

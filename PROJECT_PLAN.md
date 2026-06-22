@@ -1,6 +1,6 @@
 # rcmd-like macOS App Project Plan
 
-Last updated: 2026-06-19
+Last updated: 2026-06-22
 
 ## Purpose
 
@@ -26,6 +26,9 @@ Done:
 - App target exists in `Sources/RcmdApp`.
 - App launches as a menu bar utility.
 - Settings window exists.
+- Quick Start first-run window exists for Accessibility setup and core
+  shortcut hints; debug builds show it after every launch for repeated
+  onboarding testing.
 - Accessibility permission status and request helper exist.
 - Active `CGEventTap` exists for key event logging and handled shortcut
   suppression.
@@ -448,6 +451,7 @@ MVP v0.1 is done when:
 - App builds and launches on macOS.
 - App lives in the menu bar.
 - User can grant Accessibility permission.
+- Quick Start explains the core right Command shortcuts.
 - Holding right Command opens a simple OSD.
 - Pressing right Command + assigned letter focuses or launches an app.
 - Manual assignments persist across restart.

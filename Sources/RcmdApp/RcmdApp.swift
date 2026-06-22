@@ -11,6 +11,7 @@ final class RcmdApp: NSObject, NSApplicationDelegate {
     private let eventTapController = EventTapController()
     private var menuBarController: MenuBarController?
     private var settingsWindowController: SettingsWindowController?
+    private var quickStartWindowController: QuickStartWindowController?
     private var osdWindowController: OSDWindowController?
     private var permissionTimer: Timer?
     private var pendingOSDShowWorkItem: DispatchWorkItem?
@@ -51,6 +52,20 @@ final class RcmdApp: NSObject, NSApplicationDelegate {
                 }
             )
         )
+        quickStartWindowController = QuickStartWindowController(
+            appState: appState,
+            actions: QuickStartActions(
+                requestAccessibilityPermission: { [weak self] in
+                    self?.requestAccessibilityPermission()
+                },
+                openSettings: { [weak self] in
+                    self?.showSettings()
+                },
+                dismiss: { [weak self] in
+                    self?.quickStartWindowController?.close()
+                }
+            )
+        )
         osdWindowController = OSDWindowController(
             appState: appState,
             actions: OSDActions(
@@ -69,8 +84,9 @@ final class RcmdApp: NSObject, NSApplicationDelegate {
             appState: appState,
             actions: MenuBarActions(
                 openSettings: { [weak self] in self?.showSettings() },
-                requestAccessibilityPermission: {
-                    AccessibilityPermission.request()
+                openQuickStart: { [weak self] in self?.showQuickStart() },
+                requestAccessibilityPermission: { [weak self] in
+                    self?.requestAccessibilityPermission()
                 },
                 startEventTap: { [weak self] in self?.startEventTap() },
                 stopEventTap: { [weak self] in self?.stopEventTap() },
@@ -108,8 +124,8 @@ final class RcmdApp: NSObject, NSApplicationDelegate {
 
         startPermissionTimerIfNeeded()
 
-        if !appState.accessibilityTrusted {
-            showSettings()
+        if shouldShowQuickStartOnLaunch {
+            showQuickStart()
         }
     }
 
@@ -126,6 +142,26 @@ final class RcmdApp: NSObject, NSApplicationDelegate {
     private func showSettings() {
         settingsWindowController?.show()
         NSApp.activate(ignoringOtherApps: true)
+    }
+
+    private func showQuickStart() {
+        quickStartWindowController?.show()
+        NSApp.activate(ignoringOtherApps: true)
+    }
+
+    private var shouldShowQuickStartOnLaunch: Bool {
+        #if DEBUG
+        return true
+        #else
+        return !appState.accessibilityTrusted
+        #endif
+    }
+
+    private func requestAccessibilityPermission() {
+        AccessibilityPermission.request()
+        refreshAccessibilityAndStartMonitorIfReady()
+        startPermissionTimerIfNeeded()
+        menuBarController?.refresh()
     }
 
     private func refreshAccessibilityAndStartMonitorIfReady() {

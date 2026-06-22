@@ -21,6 +21,8 @@ left Command shortcuts alone.
   window search.
 - Press **Right Command + Tab** to focus the next readable window.
 - Create manual assignments with **Right Command + Right Option + letter**.
+- Use the Quick Start window for first-run permission setup and core shortcut
+  hints.
 - Edit assignments, key mapping, Launch at Login, and diagnostics in Settings.
 - Optionally minimize the active window when its app shortcut is pressed again.
 - Persist config in readable YAML at `~/.config/rcmd/config.yaml`.
@@ -62,12 +64,16 @@ install flow needs Developer ID signing, notarization, and stapling.
 focus windows.
 
 1. Launch `rcmd.app`.
-2. Open the menu bar item or Settings window.
-3. Grant Accessibility permission when prompted.
-4. The keyboard monitor starts automatically after permission is granted.
+2. Use the Quick Start window to grant Accessibility permission.
+3. Hold **Right Command** to show app assignments.
+4. Try **Right Command + letter**, **Right Command + Space**, and
+   **Right Command + Tab**.
 
 If the permission state looks stale, quit and relaunch the app after granting
 the permission.
+
+Debug builds show Quick Start after every launch so the first-run flow can be
+tested repeatedly. The menu bar item also includes **Quick Start...**.
 
 ## Shortcuts
 
