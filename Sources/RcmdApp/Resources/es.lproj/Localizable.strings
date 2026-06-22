@@ -37,10 +37,12 @@
 "quickStart.permissionGrantedSubtitle" = "Los atajos globales y el enfoque de ventanas están disponibles.";
 "quickStart.permissionMissingSubtitle" = "Necesario para atajos globales y búsqueda de ventanas.";
 "quickStart.grantPermission" = "Conceder permiso";
-"quickStart.holdRightCommandTitle" = "Mantén pulsado Command derecho";
+"quickStart.holdRightCommandTitle" = "Mantén pulsado ⌘";
 "quickStart.holdRightCommandSubtitle" = "La superposición muestra las letras de las apps mientras mantienes la tecla.";
 "quickStart.coreShortcutsTitle" = "Usa los tres atajos principales";
-"quickStart.coreShortcutsSubtitle" = "Right Command + letra cambia de app. Space busca ventanas. Tab recorre ventanas.";
+"quickStart.shortcutSwitchApps" = "Cambiar o abrir una app";
+"quickStart.shortcutSearchWindows" = "Buscar ventanas abiertas";
+"quickStart.shortcutCycleWindows" = "Recorrer ventanas legibles";
 "quickStart.gotIt" = "Entendido";
 
 "settings.title" = "Ajustes";
@@ -53,7 +55,7 @@
 "settings.pane.diagnostics" = "Diagnóstico";
 "settings.subtitle.overview" = "Permiso, inicio y estado del monitor de teclado activo.";
 "settings.subtitle.shortcuts" = "Comportamiento de activación y asignación de distribución del teclado.";
-"settings.subtitle.assignments" = "Vínculos manuales y dinámicos de apps usados por Command derecho.";
+"settings.subtitle.assignments" = "Vínculos manuales y dinámicos de apps usados por ⌘.";
 "settings.subtitle.windows" = "Ventanas legibles expuestas mediante Accesibilidad.";
 "settings.subtitle.diagnostics" = "Eventos recientes y estado interno para depuración.";
 "settings.group.systemAccess" = "Acceso al sistema";
@@ -81,7 +83,7 @@
 "settings.shortcut.focusNextWindow" = "Enfocar la siguiente ventana legible";
 "settings.shortcut.assignFrontmost" = "Asignar la app en primer plano";
 "settings.minimizeRepeatedShortcut" = "Minimizar la ventana activa al repetir el atajo de app";
-"settings.minimizeRepeatedShortcutDetail" = "Cuando la app de destino ya está activa, pulsar de nuevo su atajo Right Cmd minimiza la ventana enfocada en vez de reenfocar la app.";
+"settings.minimizeRepeatedShortcutDetail" = "Cuando la app de destino ya está activa, pulsar de nuevo su atajo ⌘ minimiza la ventana enfocada en vez de reenfocar la app.";
 "settings.keyMapping" = "Asignación de teclas";
 "settings.keyMappingActiveLayoutDetail" = "Usa la distribución latina activa de macOS, con alternativa QWERTY física para distribuciones no latinas.";
 "settings.keyMappingPhysicalDetail" = "Usa posiciones físicas QWERTY sin importar la distribución activa del teclado.";

@@ -37,10 +37,12 @@
 "quickStart.permissionGrantedSubtitle" = "Глобальные сочетания и фокус окон доступны.";
 "quickStart.permissionMissingSubtitle" = "Нужно для глобальных сочетаний и поиска окон.";
 "quickStart.grantPermission" = "Выдать доступ";
-"quickStart.holdRightCommandTitle" = "Удерживайте правый Command";
+"quickStart.holdRightCommandTitle" = "Удерживайте ⌘";
 "quickStart.holdRightCommandSubtitle" = "Пока клавиша удерживается, overlay показывает буквы приложений.";
 "quickStart.coreShortcutsTitle" = "Используйте три главных сочетания";
-"quickStart.coreShortcutsSubtitle" = "Right Command + буква переключает приложения. Space ищет окна. Tab циклически переключает окна.";
+"quickStart.shortcutSwitchApps" = "Перейти к приложению или запустить его";
+"quickStart.shortcutSearchWindows" = "Искать открытые окна";
+"quickStart.shortcutCycleWindows" = "Переключать доступные окна";
 "quickStart.gotIt" = "Понятно";
 
 "settings.title" = "Настройки";
@@ -81,7 +83,7 @@
 "settings.shortcut.focusNextWindow" = "Перейти к следующему доступному окну";
 "settings.shortcut.assignFrontmost" = "Назначить активное приложение";
 "settings.minimizeRepeatedShortcut" = "Сворачивать активное окно при повторном сочетании";
-"settings.minimizeRepeatedShortcutDetail" = "Если целевое приложение уже активно, повторное нажатие Right Cmd-сочетания сворачивает сфокусированное окно вместо повторного фокуса приложения.";
+"settings.minimizeRepeatedShortcutDetail" = "Если целевое приложение уже активно, повторное нажатие ⌘-сочетания сворачивает сфокусированное окно вместо повторного фокуса приложения.";
 "settings.keyMapping" = "Привязка клавиш";
 "settings.keyMappingActiveLayoutDetail" = "Использует текущую латинскую раскладку macOS, с fallback на физическую QWERTY для нелатинских раскладок.";
 "settings.keyMappingPhysicalDetail" = "Использует физические позиции QWERTY независимо от текущей раскладки.";

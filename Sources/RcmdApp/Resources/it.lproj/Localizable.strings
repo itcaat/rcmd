@@ -37,10 +37,12 @@
 "quickStart.permissionGrantedSubtitle" = "Scorciatoie globali e focus delle finestre sono disponibili.";
 "quickStart.permissionMissingSubtitle" = "Necessario per scorciatoie globali e ricerca finestre.";
 "quickStart.grantPermission" = "Concedi permesso";
-"quickStart.holdRightCommandTitle" = "Tieni premuto Command destro";
+"quickStart.holdRightCommandTitle" = "Tieni premuto ⌘";
 "quickStart.holdRightCommandSubtitle" = "L’overlay mostra le lettere delle app mentre tieni premuto il tasto.";
 "quickStart.coreShortcutsTitle" = "Usa le tre scorciatoie principali";
-"quickStart.coreShortcutsSubtitle" = "Right Command + lettera cambia app. Space cerca finestre. Tab scorre le finestre.";
+"quickStart.shortcutSwitchApps" = "Cambia o avvia un’app";
+"quickStart.shortcutSearchWindows" = "Cerca finestre aperte";
+"quickStart.shortcutCycleWindows" = "Scorri le finestre leggibili";
 "quickStart.gotIt" = "Capito";
 
 "settings.title" = "Impostazioni";
@@ -53,7 +55,7 @@
 "settings.pane.diagnostics" = "Diagnostica";
 "settings.subtitle.overview" = "Permesso, avvio e stato del monitor tastiera attivo.";
 "settings.subtitle.shortcuts" = "Comportamento di attivazione e mappatura del layout tastiera.";
-"settings.subtitle.assignments" = "Associazioni manuali e dinamiche delle app usate da Command destro.";
+"settings.subtitle.assignments" = "Associazioni manuali e dinamiche delle app usate da ⌘.";
 "settings.subtitle.windows" = "Finestre leggibili esposte tramite Accessibilità.";
 "settings.subtitle.diagnostics" = "Eventi recenti e stato interno per debug.";
 "settings.group.systemAccess" = "Accesso di sistema";
@@ -81,7 +83,7 @@
 "settings.shortcut.focusNextWindow" = "Metti a fuoco la prossima finestra leggibile";
 "settings.shortcut.assignFrontmost" = "Assegna l’app in primo piano";
 "settings.minimizeRepeatedShortcut" = "Minimizza la finestra attiva ripetendo la scorciatoia app";
-"settings.minimizeRepeatedShortcutDetail" = "Quando l’app di destinazione è già attiva, premere di nuovo la sua scorciatoia Right Cmd minimizza la finestra focalizzata invece di rifocalizzare l’app.";
+"settings.minimizeRepeatedShortcutDetail" = "Quando l’app di destinazione è già attiva, premere di nuovo la sua scorciatoia ⌘ minimizza la finestra focalizzata invece di rifocalizzare l’app.";
 "settings.keyMapping" = "Mappatura tasti";
 "settings.keyMappingActiveLayoutDetail" = "Usa il layout latino macOS attivo, con fallback QWERTY fisico per layout non latini.";
 "settings.keyMappingPhysicalDetail" = "Usa le posizioni fisiche QWERTY indipendentemente dal layout tastiera attivo.";

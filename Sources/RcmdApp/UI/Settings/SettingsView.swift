@@ -263,13 +263,13 @@ struct SettingsView: View {
         VStack(alignment: .leading, spacing: 14) {
             settingsGroup(L10n.tr("settings.group.shortcuts")) {
                 VStack(spacing: 0) {
-                    shortcutRow(keys: "Right Cmd + Letter", title: L10n.tr("settings.shortcut.focusOrLaunch"))
+                    shortcutRow(keys: "⌘ + Letter", title: L10n.tr("settings.shortcut.focusOrLaunch"))
                     separator
-                    shortcutRow(keys: "Right Cmd + Space", title: L10n.tr("settings.shortcut.searchWindows"))
+                    shortcutRow(keys: "⌘ + Space", title: L10n.tr("settings.shortcut.searchWindows"))
                     separator
-                    shortcutRow(keys: "Right Cmd + Tab", title: L10n.tr("settings.shortcut.focusNextWindow"))
+                    shortcutRow(keys: "⌘ + Tab", title: L10n.tr("settings.shortcut.focusNextWindow"))
                     separator
-                    shortcutRow(keys: "Right Cmd + Right Option + Letter", title: L10n.tr("settings.shortcut.assignFrontmost"))
+                    shortcutRow(keys: "⌘ + Right Option + Letter", title: L10n.tr("settings.shortcut.assignFrontmost"))
                 }
             }
 

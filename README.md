@@ -13,14 +13,14 @@ left Command shortcuts alone.
 
 ## What Works
 
-- Hold **Right Command** to show app assignments in a polished OSD.
-- Press **Right Command + letter** to focus a running app or launch a closed
+- Hold **⌘** to show app assignments in a polished OSD.
+- Press **⌘ + letter** to focus a running app or launch a closed
   app.
-- Press **Right Command + Space** to search open windows by title or app.
+- Press **⌘ + Space** to search open windows by title or app.
 - Use **Up/Down**, **Enter**, **Escape**, **Backspace**, and mouse clicks in
   window search.
-- Press **Right Command + Tab** to focus the next readable window.
-- Create manual assignments with **Right Command + Right Option + letter**.
+- Press **⌘ + Tab** to focus the next readable window.
+- Create manual assignments with **⌘ + Right Option + letter**.
 - Use the Quick Start window for first-run permission setup and core shortcut
   hints.
 - Use localized UI strings for English, Russian, German, Spanish, French, and
@@ -67,9 +67,8 @@ focus windows.
 
 1. Launch `rcmd.app`.
 2. Use the Quick Start window to grant Accessibility permission.
-3. Hold **Right Command** to show app assignments.
-4. Try **Right Command + letter**, **Right Command + Space**, and
-   **Right Command + Tab**.
+3. Hold **⌘** to show app assignments.
+4. Try **⌘ + letter**, **⌘ + Space**, and **⌘ + Tab**.
 
 If the permission state looks stale, quit and relaunch the app after granting
 the permission.
@@ -81,15 +80,15 @@ tested repeatedly. The menu bar item also includes **Quick Start...**.
 
 | Shortcut | Action |
 | --- | --- |
-| `Right Command` | Show app assignment OSD |
-| `Right Command + letter` | Focus or launch assigned app |
-| `Right Command + letter` again | Optionally minimize the active window |
-| `Right Command + Space` | Toggle window search |
+| `⌘` | Show app assignment OSD |
+| `⌘ + letter` | Focus or launch assigned app |
+| `⌘ + letter` again | Optionally minimize the active window |
+| `⌘ + Space` | Toggle window search |
 | `Up / Down` in search | Move selected window |
 | `Enter` in search | Focus selected window |
 | `Escape` in search | Close search |
-| `Right Command + Tab` | Focus next readable window |
-| `Right Command + Right Option + letter` | Assign frontmost app |
+| `⌘ + Tab` | Focus next readable window |
+| `⌘ + Right Option + letter` | Assign frontmost app |
 
 ## Settings
 

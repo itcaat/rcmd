@@ -24,8 +24,8 @@ final class QuickStartWindowController {
             let newWindow = NSWindow(contentViewController: hostingController)
             newWindow.title = L10n.tr("quickStart.windowTitle")
             newWindow.styleMask = [.titled, .closable, .miniaturizable]
-            newWindow.setContentSize(NSSize(width: 640, height: 440))
-            newWindow.minSize = NSSize(width: 600, height: 400)
+            newWindow.setContentSize(NSSize(width: 660, height: 480))
+            newWindow.minSize = NSSize(width: 620, height: 440)
             newWindow.isReleasedWhenClosed = false
             newWindow.center()
             window = newWindow

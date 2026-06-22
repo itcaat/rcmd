@@ -37,10 +37,12 @@
 "quickStart.permissionGrantedSubtitle" = "Globale Tastenkürzel und Fensterfokus sind verfügbar.";
 "quickStart.permissionMissingSubtitle" = "Erforderlich für globale Tastenkürzel und Fenstersuche.";
 "quickStart.grantPermission" = "Berechtigung erteilen";
-"quickStart.holdRightCommandTitle" = "Rechte Command-Taste halten";
+"quickStart.holdRightCommandTitle" = "⌘ halten";
 "quickStart.holdRightCommandSubtitle" = "Das Overlay zeigt App-Buchstaben, solange die Taste gehalten wird.";
 "quickStart.coreShortcutsTitle" = "Die drei wichtigsten Tastenkürzel verwenden";
-"quickStart.coreShortcutsSubtitle" = "Right Command + Buchstabe wechselt Apps. Space sucht Fenster. Tab wechselt Fenster.";
+"quickStart.shortcutSwitchApps" = "App wechseln oder starten";
+"quickStart.shortcutSearchWindows" = "Offene Fenster suchen";
+"quickStart.shortcutCycleWindows" = "Lesbare Fenster wechseln";
 "quickStart.gotIt" = "Verstanden";
 
 "settings.title" = "Einstellungen";
@@ -81,7 +83,7 @@
 "settings.shortcut.focusNextWindow" = "Nächstes lesbares Fenster fokussieren";
 "settings.shortcut.assignFrontmost" = "Vorderste App zuweisen";
 "settings.minimizeRepeatedShortcut" = "Aktives Fenster bei wiederholtem App-Kürzel minimieren";
-"settings.minimizeRepeatedShortcutDetail" = "Wenn die Ziel-App bereits aktiv ist, minimiert ein erneutes Right-Cmd-Kürzel das fokussierte Fenster, statt die App erneut zu fokussieren.";
+"settings.minimizeRepeatedShortcutDetail" = "Wenn die Ziel-App bereits aktiv ist, minimiert ein erneutes ⌘-Kürzel das fokussierte Fenster, statt die App erneut zu fokussieren.";
 "settings.keyMapping" = "Tastenzuordnung";
 "settings.keyMappingActiveLayoutDetail" = "Verwendet das aktive lateinische macOS-Tastaturlayout, mit physischer QWERTY-Ausweichlösung für nicht-lateinische Layouts.";
 "settings.keyMappingPhysicalDetail" = "Verwendet physische QWERTY-Tastenpositionen unabhängig vom aktiven Tastaturlayout.";

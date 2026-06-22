@@ -37,10 +37,12 @@
 "quickStart.permissionGrantedSubtitle" = "Les raccourcis globaux et le focus des fenêtres sont disponibles.";
 "quickStart.permissionMissingSubtitle" = "Requis pour les raccourcis globaux et la recherche de fenêtres.";
 "quickStart.grantPermission" = "Autoriser";
-"quickStart.holdRightCommandTitle" = "Maintenez Command droit";
+"quickStart.holdRightCommandTitle" = "Maintenez ⌘";
 "quickStart.holdRightCommandSubtitle" = "L’overlay affiche les lettres des apps tant que la touche est maintenue.";
 "quickStart.coreShortcutsTitle" = "Utilisez les trois raccourcis principaux";
-"quickStart.coreShortcutsSubtitle" = "Right Command + lettre change d’app. Space recherche les fenêtres. Tab parcourt les fenêtres.";
+"quickStart.shortcutSwitchApps" = "Changer d’app ou la lancer";
+"quickStart.shortcutSearchWindows" = "Rechercher les fenêtres ouvertes";
+"quickStart.shortcutCycleWindows" = "Parcourir les fenêtres lisibles";
 "quickStart.gotIt" = "Compris";
 
 "settings.title" = "Réglages";
@@ -53,7 +55,7 @@
 "settings.pane.diagnostics" = "Diagnostic";
 "settings.subtitle.overview" = "Autorisation, démarrage et état du moniteur clavier actif.";
 "settings.subtitle.shortcuts" = "Comportement des déclencheurs et correspondance de disposition clavier.";
-"settings.subtitle.assignments" = "Affectations manuelles et dynamiques utilisées par Command droit.";
+"settings.subtitle.assignments" = "Affectations manuelles et dynamiques utilisées par ⌘.";
 "settings.subtitle.windows" = "Fenêtres lisibles exposées par Accessibilité.";
 "settings.subtitle.diagnostics" = "Événements récents et état interne pour le débogage.";
 "settings.group.systemAccess" = "Accès système";
@@ -81,7 +83,7 @@
 "settings.shortcut.focusNextWindow" = "Focaliser la prochaine fenêtre lisible";
 "settings.shortcut.assignFrontmost" = "Affecter l’app au premier plan";
 "settings.minimizeRepeatedShortcut" = "Réduire la fenêtre active lors d’un raccourci d’app répété";
-"settings.minimizeRepeatedShortcutDetail" = "Quand l’app cible est déjà active, appuyer de nouveau sur son raccourci Right Cmd réduit la fenêtre focalisée au lieu de refocaliser l’app.";
+"settings.minimizeRepeatedShortcutDetail" = "Quand l’app cible est déjà active, appuyer de nouveau sur son raccourci ⌘ réduit la fenêtre focalisée au lieu de refocaliser l’app.";
 "settings.keyMapping" = "Correspondance des touches";
 "settings.keyMappingActiveLayoutDetail" = "Utilise la disposition latine active de macOS, avec repli QWERTY physique pour les dispositions non latines.";
 "settings.keyMappingPhysicalDetail" = "Utilise les positions physiques QWERTY indépendamment de la disposition clavier active.";

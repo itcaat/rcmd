@@ -37,10 +37,12 @@
 "quickStart.permissionGrantedSubtitle" = "Global shortcuts and window focusing are available.";
 "quickStart.permissionMissingSubtitle" = "Required for global shortcuts and window search.";
 "quickStart.grantPermission" = "Grant Permission";
-"quickStart.holdRightCommandTitle" = "Hold Right Command";
+"quickStart.holdRightCommandTitle" = "Hold ⌘";
 "quickStart.holdRightCommandSubtitle" = "The overlay shows app letters while the key is held.";
 "quickStart.coreShortcutsTitle" = "Use the three core shortcuts";
-"quickStart.coreShortcutsSubtitle" = "Right Command + letter switches apps. Space searches windows. Tab cycles windows.";
+"quickStart.shortcutSwitchApps" = "Switch or launch an app";
+"quickStart.shortcutSearchWindows" = "Search open windows";
+"quickStart.shortcutCycleWindows" = "Cycle readable windows";
 "quickStart.gotIt" = "Got it";
 
 "settings.title" = "Settings";
@@ -53,7 +55,7 @@
 "settings.pane.diagnostics" = "Diagnostics";
 "settings.subtitle.overview" = "Permission, startup, and active keyboard monitor state.";
 "settings.subtitle.shortcuts" = "Trigger behavior and keyboard layout mapping.";
-"settings.subtitle.assignments" = "Manual and dynamic app bindings used by right Command.";
+"settings.subtitle.assignments" = "Manual and dynamic app bindings used by ⌘.";
 "settings.subtitle.windows" = "Readable windows exposed through Accessibility.";
 "settings.subtitle.diagnostics" = "Recent events and internal status for debugging.";
 "settings.group.systemAccess" = "System access";
@@ -81,7 +83,7 @@
 "settings.shortcut.focusNextWindow" = "Focus next readable window";
 "settings.shortcut.assignFrontmost" = "Assign frontmost app";
 "settings.minimizeRepeatedShortcut" = "Minimize active window on repeated app shortcut";
-"settings.minimizeRepeatedShortcutDetail" = "When the target app is already active, pressing its Right Cmd shortcut again minimizes the focused window instead of refocusing the app.";
+"settings.minimizeRepeatedShortcutDetail" = "When the target app is already active, pressing its ⌘ shortcut again minimizes the focused window instead of refocusing the app.";
 "settings.keyMapping" = "Key mapping";
 "settings.keyMappingActiveLayoutDetail" = "Uses the active Latin macOS keyboard layout, with physical QWERTY fallback for non-Latin layouts.";
 "settings.keyMappingPhysicalDetail" = "Uses physical QWERTY letter positions regardless of active keyboard layout.";

@@ -16,12 +16,7 @@ struct QuickStartView: View {
                     title: L10n.tr("quickStart.holdRightCommandTitle"),
                     subtitle: L10n.tr("quickStart.holdRightCommandSubtitle")
                 )
-                shortcutStep(
-                    number: "3",
-                    systemImage: "keyboard",
-                    title: L10n.tr("quickStart.coreShortcutsTitle"),
-                    subtitle: L10n.tr("quickStart.coreShortcutsSubtitle")
-                )
+                coreShortcutsStep
             }
 
             Spacer(minLength: 0)
@@ -29,7 +24,7 @@ struct QuickStartView: View {
             footer
         }
         .padding(28)
-        .frame(width: 640, height: 440)
+        .frame(width: 660, height: 480)
         .background(Color(nsColor: .windowBackgroundColor))
     }
 
@@ -107,13 +102,47 @@ struct QuickStartView: View {
         .clipShape(RoundedRectangle(cornerRadius: 8, style: .continuous))
     }
 
+    private var coreShortcutsStep: some View {
+        HStack(alignment: .top, spacing: 12) {
+            stepBadge("3")
+                .padding(.top, 2)
+
+            rowIcon("keyboard")
+
+            VStack(alignment: .leading, spacing: 9) {
+                Text(L10n.tr("quickStart.coreShortcutsTitle"))
+                    .font(.headline)
+
+                VStack(alignment: .leading, spacing: 7) {
+                    shortcutListRow(keys: "⌘ + Letter", description: L10n.tr("quickStart.shortcutSwitchApps"))
+                    shortcutListRow(keys: "⌘ + Space", description: L10n.tr("quickStart.shortcutSearchWindows"))
+                    shortcutListRow(keys: "⌘ + Tab", description: L10n.tr("quickStart.shortcutCycleWindows"))
+                }
+            }
+
+            Spacer(minLength: 0)
+        }
+        .padding(14)
+        .background(Color(nsColor: .controlBackgroundColor))
+        .clipShape(RoundedRectangle(cornerRadius: 8, style: .continuous))
+    }
+
+    private func shortcutListRow(keys: String, description: String) -> some View {
+        HStack(alignment: .firstTextBaseline, spacing: 10) {
+            shortcutPill(keys)
+                .frame(width: 112, alignment: .leading)
+
+            Text(description)
+                .font(.callout)
+                .foregroundStyle(.secondary)
+                .frame(maxWidth: .infinity, alignment: .leading)
+                .fixedSize(horizontal: false, vertical: true)
+        }
+    }
+
     private var footer: some View {
         HStack(spacing: 10) {
-            shortcutPill("Right Cmd + Letter")
-            shortcutPill("Right Cmd + Space")
-            shortcutPill("Right Cmd + Tab")
-
-            Spacer(minLength: 12)
+            Spacer(minLength: 0)
 
             Button {
                 actions.openSettings()
